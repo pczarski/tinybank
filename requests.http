@@ -1,1 +1,4 @@
-GET http://localhost:8080/ping
+### POST user
+POST http://localhost:8080/user/johnTheBanker
+Content-Type: application/json
+

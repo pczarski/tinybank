@@ -26,6 +26,7 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	testCompileOnly("org.assertj:assertj-core:3.11.1")
 }
 
 tasks.withType<Test> {
