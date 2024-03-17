@@ -6,12 +6,19 @@ import org.mock.tinybank.dto.TransactionDto;
 import java.math.BigInteger;
 
 import static org.mock.tinybank.domain.TransactionType.DEPOSIT;
+import static org.mock.tinybank.domain.TransactionType.WITHDRAWAL;
 
 class TransactionMapper {
     static final String DEPOSIT_POINT = "DEPOSIT_POINT";
+    static final String WITHDRAWAL_POINT = "WITHDRAWAL_POINT";
 
-    static TransactionDto mapDepositToTransaction(AccountAmountDto accountAmountDto) {
-        return new TransactionDto(DEPOSIT_POINT, accountAmountDto.userName(), accountAmountDto.units(), DEPOSIT);
+    static TransactionDto mapDepositToTransaction(AccountAmountDto deposit) {
+        return new TransactionDto(DEPOSIT_POINT, deposit.userName(), deposit.units(), DEPOSIT);
+    }
+
+    //todo test
+    static TransactionDto mapWithdrawalToTransaction(AccountAmountDto withdrawal) {
+        return new TransactionDto(withdrawal.userName(), WITHDRAWAL_POINT, withdrawal.units(), WITHDRAWAL);
     }
 
     static AccountAmountDto mapTransactionToDepositWithdrawalDto(TransactionDto transactionDto) {

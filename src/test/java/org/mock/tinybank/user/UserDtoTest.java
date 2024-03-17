@@ -5,7 +5,7 @@ import org.mock.tinybank.dto.UserDto;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class UserTest {
+class UserDtoTest {
     @Test
     void userNameCannotBeNull() {
         assertThrows(NullPointerException.class, () -> new UserDto(null));

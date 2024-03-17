@@ -30,8 +30,8 @@ class TransactionPersistenceServiceTest {
     @Test
     void getTransactions_ReturnsCorrectTransactions() {
         TransactionDto myTransaction1 = new TransactionDto("this_is_me", "this_is_not_me", BigInteger.TEN, TransactionType.DEPOSIT);
-        TransactionDto myTransaction2 = new TransactionDto("also_not_me", "this_is_me", BigInteger.valueOf(20), TransactionType.WITHDRAW);
-        TransactionDto transaction3 = new TransactionDto("not_me", "not_me2", BigInteger.valueOf(20), TransactionType.WITHDRAW);
+        TransactionDto myTransaction2 = new TransactionDto("also_not_me", "this_is_me", BigInteger.valueOf(20), TransactionType.WITHDRAWAL);
+        TransactionDto transaction3 = new TransactionDto("not_me", "not_me2", BigInteger.valueOf(20), TransactionType.WITHDRAWAL);
         transactionPersistenceService.addTransaction(myTransaction1);
         transactionPersistenceService.addTransaction(myTransaction2);
         transactionPersistenceService.addTransaction(transaction3);

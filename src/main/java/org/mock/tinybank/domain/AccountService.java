@@ -8,8 +8,7 @@ import org.springframework.stereotype.Service;
 import java.math.BigInteger;
 import java.util.List;
 
-import static org.mock.tinybank.domain.TransactionMapper.mapDepositToTransaction;
-import static org.mock.tinybank.domain.TransactionMapper.mapTransactionToDepositWithdrawalDto;
+import static org.mock.tinybank.domain.TransactionMapper.*;
 
 @Service
 public class AccountService {
@@ -35,5 +34,16 @@ public class AccountService {
         List<TransactionDto> transactions = transactionPersistenceService.getTransactions(userName);
         User user = new User(transactions.stream().map(TransactionMapper::mapFromDtoToAccountTransaction).toList());
         return user.getBalance();
+    }
+
+    //todo test
+    public AccountAmountDto withdraw(AccountAmountDto withdrawal) {
+        BigInteger balance = getBalance(withdrawal.userName());
+        if (balance.subtract(withdrawal.units()).compareTo(BigInteger.ZERO) > 0) {
+            TransactionDto transactionDto = mapWithdrawalToTransaction(withdrawal);
+            TransactionDto withdrawalTransaction = transactionPersistenceService.addTransaction(transactionDto);
+            return mapTransactionToDepositWithdrawalDto(withdrawalTransaction);
+        }
+        throw new InsufficientBalanceException();
     }
 }

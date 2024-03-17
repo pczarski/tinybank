@@ -20,9 +20,13 @@ public class AccountController {
         return accountService.deposit(deposit);
     }
 
+    @PostMapping("/withdraw")
+    public AccountAmountDto withdraw(@RequestBody AccountAmountDto withdrawal) {
+        return accountService.withdraw(withdrawal);
+    }
+
     @GetMapping("/balances/{userName}")
     public BigInteger getBalance(@PathVariable String userName) {
         return accountService.getBalance(userName);
     }
-
 }

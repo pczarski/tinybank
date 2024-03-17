@@ -41,6 +41,11 @@ class TinyBankApplicationTest {
         return objectMapper.readValue(response, resposneClass);
     }
 
+    private UserDto givenUser(String username) throws Exception {
+        UserDto requestUser = new UserDto(username);
+        return post("/user", requestUser, UserDto.class, HttpStatus.OK.value());
+    }
+
     @Test
     void getNonExistentUser() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/user/i_dont_exist"))
@@ -57,15 +62,36 @@ class TinyBankApplicationTest {
     }
 
     @Test
-    void balanceCorrectAfterDeposit() throws Exception {
-        UserDto requestUser = new UserDto("depositor");
-        post("/user", requestUser, UserDto.class, HttpStatus.OK.value());
-        AccountAmountDto deposit = new AccountAmountDto(requestUser.userName(), BigInteger.TEN);
+    void depositAndWithdrawal_getsCorrectBalance() throws Exception {
+        UserDto givenUser = givenUser("depositor");
+        AccountAmountDto deposit = new AccountAmountDto(givenUser.userName(), BigInteger.TEN);
         AccountAmountDto depositResponse = post("/deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
+
         assertThat(depositResponse).isEqualTo(deposit);
+
         post("/deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
         BigInteger balance = get("/balances/depositor", BigInteger.class, HttpStatus.OK.value());
         assertThat(balance).isEqualTo(20);
+
+        AccountAmountDto withdrawal = new AccountAmountDto(givenUser.userName(), BigInteger.valueOf(5));
+        AccountAmountDto withdrawalResponse = post("/withdraw", withdrawal, AccountAmountDto.class, HttpStatus.OK.value());
+        assertThat(withdrawalResponse).isEqualTo(withdrawal);
+
+        BigInteger newBalance = get("/balances/depositor", BigInteger.class, HttpStatus.OK.value());
+        assertThat(newBalance).isEqualTo(15);
+    }
+
+    @Test
+    void insufficientBalance_returns400() throws Exception {
+        UserDto givenUser = givenUser("someGuy");
+        AccountAmountDto deposit = new AccountAmountDto(givenUser.userName(), BigInteger.TEN);
+        post("/deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
+
+        AccountAmountDto withdrawal = new AccountAmountDto(givenUser.userName(), BigInteger.valueOf(11));
+        mockMvc.perform(MockMvcRequestBuilders.post("/withdraw")
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(withdrawal)))
+                .andExpect(status().isBadRequest());
     }
 
 }
