@@ -2,7 +2,7 @@ package org.mock.tinybank;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mock.tinybank.dto.DepositWithdrawDto;
+import org.mock.tinybank.dto.AccountAmountDto;
 import org.mock.tinybank.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -57,12 +57,15 @@ class TinyBankApplicationTest {
     }
 
     @Test
-    void deposit() throws Exception {
+    void balanceCorrectAfterDeposit() throws Exception {
         UserDto requestUser = new UserDto("depositor");
         post("/user", requestUser, UserDto.class, HttpStatus.OK.value());
-        DepositWithdrawDto deposit = new DepositWithdrawDto(requestUser.userName(), BigInteger.TEN);
-        DepositWithdrawDto depositResponse = post("/deposit", deposit, DepositWithdrawDto.class, HttpStatus.OK.value());
+        AccountAmountDto deposit = new AccountAmountDto(requestUser.userName(), BigInteger.TEN);
+        AccountAmountDto depositResponse = post("/deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
         assertThat(depositResponse).isEqualTo(deposit);
+        post("/deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
+        BigInteger balance = get("/balances/depositor", BigInteger.class, HttpStatus.OK.value());
+        assertThat(balance).isEqualTo(20);
     }
 
 }

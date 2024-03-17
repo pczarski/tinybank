@@ -2,7 +2,7 @@ package org.mock.tinybank.domain;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mock.tinybank.dto.DepositWithdrawDto;
+import org.mock.tinybank.dto.AccountAmountDto;
 import org.mock.tinybank.dto.UserDto;
 import org.mock.tinybank.persistence.TransactionPersistenceService;
 
@@ -12,14 +12,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-class TransactionServiceTest {
+class AccountServiceTest {
 
     private final UserService userService = mock(UserService.class);
-    private TransactionService transactionService;
+    private AccountService accountService;
 
     @BeforeEach
     void beforeEach() {
-        transactionService = new TransactionService(userService, new TransactionPersistenceService());
+        accountService = new AccountService(userService, new TransactionPersistenceService());
     }
 
     @Test
@@ -27,8 +27,8 @@ class TransactionServiceTest {
         String userName = "banker_man";
         UserDto user = new UserDto(userName);
         when(userService.getUser(userName)).thenReturn(user);
-        DepositWithdrawDto deposit = new DepositWithdrawDto(userName, BigInteger.TWO);
-        DepositWithdrawDto actual = transactionService.deposit(deposit);
+        AccountAmountDto deposit = new AccountAmountDto(userName, BigInteger.TWO);
+        AccountAmountDto actual = accountService.deposit(deposit);
         assertThat(actual).isEqualTo(deposit);
     }
 }
