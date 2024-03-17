@@ -1,5 +1,7 @@
-package org.mock.tinybank.user;
+package org.mock.tinybank.api;
 
+import org.mock.tinybank.dto.UserDto;
+import org.mock.tinybank.domain.UserService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

@@ -2,6 +2,8 @@ package org.mock.tinybank.user;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mock.tinybank.dto.UserDto;
+import org.mock.tinybank.domain.UserService;
 import org.mock.tinybank.persistence.EntityNotFoundException;
 
 import static org.assertj.core.api.Assertions.assertThat;

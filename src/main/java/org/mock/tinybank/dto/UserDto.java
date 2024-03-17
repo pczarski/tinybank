@@ -1,4 +1,4 @@
-package org.mock.tinybank.user;
+package org.mock.tinybank.dto;
 
 import java.util.Objects;
 

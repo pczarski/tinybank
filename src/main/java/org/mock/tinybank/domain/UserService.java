@@ -1,5 +1,6 @@
-package org.mock.tinybank.user;
+package org.mock.tinybank.domain;
 
+import org.mock.tinybank.dto.UserDto;
 import org.mock.tinybank.persistence.EntityNotFoundException;
 import org.mock.tinybank.persistence.KeyValueStore;
 import org.springframework.stereotype.Service;
