@@ -7,6 +7,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class UserTest {
     @Test
     void userNameCannotBeNull() {
-        assertThrows(NullPointerException.class, () -> new User(null));
+        assertThrows(NullPointerException.class, () -> new UserDto(null));
     }
 }

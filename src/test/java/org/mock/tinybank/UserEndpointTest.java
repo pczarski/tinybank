@@ -2,7 +2,7 @@ package org.mock.tinybank;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mock.tinybank.user.User;
+import org.mock.tinybank.user.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -32,11 +32,26 @@ class UserEndpointTest {
                 .andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(response, resposneClass);
     }
+    private <T> T get(String path, Class<T> resposneClass, int expectedCode) throws Exception {
+        String response = mockMvc.perform(MockMvcRequestBuilders.get(path))
+                .andExpect(status().is(expectedCode))
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(response, resposneClass);
+    }
+
+    @Test
+    void getNonExistentUser() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/user/i_dont_exist"))
+                .andExpect(status().isNotFound());
+    }
 
     @Test
     void createUser() throws Exception {
-        User requestUser = new User("bankUser");
-        User expectedUser = post("/user", requestUser, User.class, HttpStatus.OK.value());
-        assertThat(expectedUser).isEqualTo(new User("bankUser"));
+        UserDto requestUser = new UserDto("bankUser");
+        UserDto postResponseUser = post("/user", requestUser, UserDto.class, HttpStatus.OK.value());
+        assertThat(postResponseUser).isEqualTo(requestUser);
+        UserDto getResponseUser = get("/user/"+requestUser.userName(), UserDto.class, HttpStatus.OK.value());
+        assertThat(getResponseUser).isEqualTo(requestUser);
     }
+
 }
