@@ -2,21 +2,23 @@ package org.mock.tinybank;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.mock.tinybank.dto.DepositWithdrawDto;
 import org.mock.tinybank.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import org.springframework.http.HttpStatus;
+import java.math.BigInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-class UserEndpointTest {
+class TinyBankApplicationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -52,6 +54,15 @@ class UserEndpointTest {
         assertThat(postResponseUser).isEqualTo(requestUser);
         UserDto getResponseUser = get("/user/"+requestUser.userName(), UserDto.class, HttpStatus.OK.value());
         assertThat(getResponseUser).isEqualTo(requestUser);
+    }
+
+    @Test
+    void deposit() throws Exception {
+        UserDto requestUser = new UserDto("depositor");
+        post("/user", requestUser, UserDto.class, HttpStatus.OK.value());
+        DepositWithdrawDto deposit = new DepositWithdrawDto(requestUser.userName(), BigInteger.TEN);
+        DepositWithdrawDto depositResponse = post("/deposit", deposit, DepositWithdrawDto.class, HttpStatus.OK.value());
+        assertThat(depositResponse).isEqualTo(deposit);
     }
 
 }

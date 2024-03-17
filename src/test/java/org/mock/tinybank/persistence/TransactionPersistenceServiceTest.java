@@ -7,6 +7,7 @@ import org.mock.tinybank.dto.TransactionDto;
 import java.math.BigInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mock.tinybank.domain.TransactionType.DEPOSIT;
 
 class TransactionPersistenceServiceTest {
 
@@ -19,7 +20,7 @@ class TransactionPersistenceServiceTest {
 
     @Test
     void addTransaction() {
-        TransactionDto toAdd = new TransactionDto("from_me", "to_you", BigInteger.TEN);
+        TransactionDto toAdd = new TransactionDto("from_me", "to_you", BigInteger.TEN, DEPOSIT);
         TransactionDto actual = transactionPersistenceService.addTransaction(toAdd);
         assertThat(actual).isEqualTo(toAdd);
     }
