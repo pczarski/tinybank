@@ -39,7 +39,6 @@ public class AccountController {
         return accountService.transfer(transferDto);
     }
 
-    // todo test
     @GetMapping("/{username}/transactions")
     public List<AccountTransaction> getTransactions(@PathVariable String username) {
         return accountService.getTransactions(username);

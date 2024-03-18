@@ -2,6 +2,10 @@ package org.mock.tinybank;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
+import org.mock.tinybank.domain.AccountTransaction;
+import org.mock.tinybank.domain.AccountTransactionIncomingTransfer;
+import org.mock.tinybank.domain.AccountTransactionOutgoingTransfer;
+import org.mock.tinybank.domain.AccountTransactionWithdrawalOrDeposit;
 import org.mock.tinybank.dto.AccountAmountDto;
 import org.mock.tinybank.dto.UnitTransferDto;
 import org.mock.tinybank.dto.UserDto;
@@ -13,8 +17,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mock.tinybank.domain.TransactionType.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -110,6 +117,60 @@ class TinyBankApplicationTest {
         assertThat(receiverBalance).isEqualTo(4);
     }
 
+    private static List<AccountTransaction> getExpectedTransactionsForFirstUserTransactionHistoryGetTest() {
+        List<AccountTransaction> expectedTransactions = new ArrayList<>();
+        expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.TEN, DEPOSIT));
+        expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.valueOf(11), DEPOSIT));
+        expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.valueOf(-2), WITHDRAWAL));
+        expectedTransactions.add(new AccountTransactionOutgoingTransfer(BigInteger.valueOf(-4), TRANSFER, "otherUser"));
+        expectedTransactions.add(new AccountTransactionIncomingTransfer(BigInteger.valueOf(3), TRANSFER, "otherUser"));
+        return expectedTransactions;
+    }
+
+    private static List<AccountTransaction> getExpectedTransactionsForOtherUserTransactionHistoryGetTest() {
+        List<AccountTransaction> expectedTransactions = new ArrayList<>();
+        expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.TEN, DEPOSIT));
+        expectedTransactions.add(new AccountTransactionIncomingTransfer(BigInteger.valueOf(4), TRANSFER, "firstUser"));
+        expectedTransactions.add(new AccountTransactionOutgoingTransfer(BigInteger.valueOf(-3), TRANSFER, "firstUser"));
+        return expectedTransactions;
+    }
+
+    @Test
+    void getEmptyTransactions() throws Exception {
+        givenUser("firstUser");
+    }
+
+    @Test
+    void getTransactionsForAUser() throws Exception {
+        UserDto firstUser = givenUser("firstUser");
+        UserDto otherUser = givenUser("otherUser");
+
+        post("/accounts/deposit", new AccountAmountDto(otherUser.username(), BigInteger.TEN), AccountAmountDto.class, HttpStatus.OK.value());
+        post("/accounts/deposit", new AccountAmountDto(firstUser.username(), BigInteger.TEN), AccountAmountDto.class, HttpStatus.OK.value());
+        post("/accounts/deposit", new AccountAmountDto(firstUser.username(), BigInteger.valueOf(11)), AccountAmountDto.class, HttpStatus.OK.value());
+        post("/accounts/withdraw", new AccountAmountDto(firstUser.username(), BigInteger.valueOf(2)), AccountAmountDto.class, HttpStatus.OK.value());
+        post("/accounts/transfer", new UnitTransferDto(firstUser.username(), otherUser.username(), BigInteger.valueOf(4)), AccountAmountDto.class, HttpStatus.OK.value());
+        post("/accounts/transfer", new UnitTransferDto(otherUser.username(), firstUser.username(), BigInteger.valueOf(3)), AccountAmountDto.class, HttpStatus.OK.value());
+
+        String firstUserTransactionHistoryJson = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/" + firstUser.username() + "/transactions"))
+                .andExpect(status().is(HttpStatus.OK.value()))
+                .andReturn().getResponse().getContentAsString();
+
+        String otherUserTransactionHistoryJson = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/" + otherUser.username() + "/transactions"))
+                .andExpect(status().is(HttpStatus.OK.value()))
+                .andReturn().getResponse().getContentAsString();
+
+        List<AccountTransaction> expectedFirstUserTransactions = getExpectedTransactionsForFirstUserTransactionHistoryGetTest();
+        String expectedFirstUserJson = new ObjectMapper().writeValueAsString(expectedFirstUserTransactions);
+
+        List<AccountTransaction> expectedOtherUserTransactions = getExpectedTransactionsForOtherUserTransactionHistoryGetTest();
+        String expectedOtherUserTransactionsJson = new ObjectMapper().writeValueAsString(expectedOtherUserTransactions);
+
+        assertThat(firstUserTransactionHistoryJson).isEqualTo(expectedFirstUserJson);
+        assertThat(otherUserTransactionHistoryJson).isEqualTo(expectedOtherUserTransactionsJson);
+    }
+
+    //        List<AccountTransaction> transactions = objectMapper.readValue(response, objectMapper.getTypeFactory().constructCollectionType(List.class, AccountTransaction.class));
     private <T> T post(String path, Object request, Class<T> resposneClass, int expectedCode) throws Exception {
         String response = mockMvc.perform(MockMvcRequestBuilders.post(path)
                         .contentType("application/json")
