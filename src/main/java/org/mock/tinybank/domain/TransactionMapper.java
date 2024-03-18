@@ -1,7 +1,5 @@
 package org.mock.tinybank.domain;
 
-import org.mock.tinybank.dto.AccountAmountDto;
-import org.mock.tinybank.dto.UnitTransferDto;
 import org.mock.tinybank.persistence.TransactionDao;
 
 import java.math.BigInteger;
@@ -13,25 +11,25 @@ class TransactionMapper {
     static final String DEPOSIT_POINT = "DEPOSIT_POINT";
     static final String WITHDRAWAL_POINT = "WITHDRAWAL_POINT";
 
-    static TransactionDao depositToTransaction(AccountAmountDto deposit) {
+    static TransactionDao depositToTransaction(AccountAmountRecord deposit) {
         return new TransactionDao(DEPOSIT_POINT, deposit.username(), deposit.units(), DEPOSIT);
     }
 
-    static TransactionDao withdrawalToTransaction(AccountAmountDto withdrawal) {
+    static TransactionDao withdrawalToTransaction(AccountAmountRecord withdrawal) {
         return new TransactionDao(withdrawal.username(), WITHDRAWAL_POINT, withdrawal.units(), WITHDRAWAL);
     }
 
-    static TransactionDao toTransaction(UnitTransferDto transferDto) {
+    static TransactionDao toTransaction(UnitTransferRecord transferDto) {
         return new TransactionDao(transferDto.fromUser(), transferDto.toUser(), transferDto.units(), TRANSFER);
     }
 
-    static UnitTransferDto toTransfer(TransactionDao transactionDao) {
-        return new UnitTransferDto(transactionDao.fromUser(), transactionDao.toUser(), transactionDao.units());
+    static UnitTransferRecord toTransfer(TransactionDao transactionDao) {
+        return new UnitTransferRecord(transactionDao.fromUser(), transactionDao.toUser(), transactionDao.units());
     }
 
-    static AccountAmountDto toDepositWithdrawalDto(TransactionDao transactionDao) {
+    static AccountAmountRecord toDepositWithdrawalDto(TransactionDao transactionDao) {
         String userAccount = transactionDao.transactionType() == DEPOSIT ? transactionDao.toUser() : transactionDao.fromUser();
-        return new AccountAmountDto(userAccount, transactionDao.units());
+        return new AccountAmountRecord(userAccount, transactionDao.units());
     }
 
     static AccountTransaction toAccountTransactionWithdrawalOrDeposit(TransactionDao transactionDao, String selectedUsername) {

@@ -1,7 +1,5 @@
 package org.mock.tinybank.domain;
 
-import org.mock.tinybank.dto.AccountAmountDto;
-import org.mock.tinybank.dto.UnitTransferDto;
 import org.mock.tinybank.persistence.TransactionDao;
 import org.mock.tinybank.persistence.TransactionPersistenceService;
 import org.springframework.stereotype.Service;
@@ -23,7 +21,7 @@ public class AccountService {
         this.transactionPersistenceService = transactionPersistenceService;
     }
 
-    public AccountAmountDto deposit(AccountAmountDto deposit) {
+    public AccountAmountRecord deposit(AccountAmountRecord deposit) {
         userService.getUser(deposit.username());
         TransactionDao transactionDao = transactionPersistenceService.addTransaction(depositToTransaction(deposit));
         return toDepositWithdrawalDto(transactionDao);
@@ -35,7 +33,7 @@ public class AccountService {
         return user.getBalance();
     }
 
-    public AccountAmountDto withdraw(AccountAmountDto withdrawal) {
+    public AccountAmountRecord withdraw(AccountAmountRecord withdrawal) {
         BigInteger balance = getBalance(withdrawal.username());
         if (isPositive(balance.subtract(withdrawal.units()))) {
             TransactionDao transactionDao = withdrawalToTransaction(withdrawal);
@@ -45,7 +43,7 @@ public class AccountService {
         throw new InsufficientBalanceException();
     }
 
-    public UnitTransferDto transfer(UnitTransferDto transactionDto) {
+    public UnitTransferRecord transfer(UnitTransferRecord transactionDto) {
         userService.getUser(transactionDto.toUser()); //this could be a filter
         BigInteger senderBalance = getBalance(transactionDto.fromUser());
         if (isPositive(senderBalance.subtract(transactionDto.units()))) {

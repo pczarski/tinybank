@@ -3,8 +3,6 @@ package org.mock.tinybank;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mock.tinybank.domain.*;
-import org.mock.tinybank.dto.AccountAmountDto;
-import org.mock.tinybank.dto.UnitTransferDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -67,17 +65,17 @@ class TinyBankApplicationTest {
     @Test
     void depositAndWithdrawal_getsCorrectBalance() throws Exception {
         UserRecord givenUser = givenUser("depositor");
-        AccountAmountDto deposit = new AccountAmountDto(givenUser.username(), BigInteger.TEN);
-        AccountAmountDto depositResponse = post("/accounts//deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
+        AccountAmountRecord deposit = new AccountAmountRecord(givenUser.username(), BigInteger.TEN);
+        AccountAmountRecord depositResponse = post("/accounts//deposit", deposit, AccountAmountRecord.class, HttpStatus.OK.value());
 
         assertThat(depositResponse).isEqualTo(deposit);
 
-        post("/accounts/deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
+        post("/accounts/deposit", deposit, AccountAmountRecord.class, HttpStatus.OK.value());
         BigInteger balance = get("/accounts/balances/depositor", BigInteger.class, HttpStatus.OK.value());
         assertThat(balance).isEqualTo(20);
 
-        AccountAmountDto withdrawal = new AccountAmountDto(givenUser.username(), BigInteger.valueOf(5));
-        AccountAmountDto withdrawalResponse = post("/accounts/withdraw", withdrawal, AccountAmountDto.class, HttpStatus.OK.value());
+        AccountAmountRecord withdrawal = new AccountAmountRecord(givenUser.username(), BigInteger.valueOf(5));
+        AccountAmountRecord withdrawalResponse = post("/accounts/withdraw", withdrawal, AccountAmountRecord.class, HttpStatus.OK.value());
         assertThat(withdrawalResponse).isEqualTo(withdrawal);
 
         BigInteger newBalance = get("/accounts/balances/depositor", BigInteger.class, HttpStatus.OK.value());
@@ -87,10 +85,10 @@ class TinyBankApplicationTest {
     @Test
     void insufficientBalance_returns400() throws Exception {
         UserRecord givenUser = givenUser("someGuy");
-        AccountAmountDto deposit = new AccountAmountDto(givenUser.username(), BigInteger.TEN);
-        post("/accounts/deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
+        AccountAmountRecord deposit = new AccountAmountRecord(givenUser.username(), BigInteger.TEN);
+        post("/accounts/deposit", deposit, AccountAmountRecord.class, HttpStatus.OK.value());
 
-        AccountAmountDto withdrawal = new AccountAmountDto(givenUser.username(), BigInteger.valueOf(11));
+        AccountAmountRecord withdrawal = new AccountAmountRecord(givenUser.username(), BigInteger.valueOf(11));
         mockMvc.perform(MockMvcRequestBuilders.post("/accounts/withdraw")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(withdrawal)))
@@ -101,10 +99,10 @@ class TinyBankApplicationTest {
     void transferMoneyToAnotherUser() throws Exception {
         UserRecord sender = givenUser("sender");
         UserRecord receiver = givenUser("receiver");
-        post("/accounts/deposit", new AccountAmountDto(sender.username(), BigInteger.TEN), AccountAmountDto.class, HttpStatus.OK.value());
+        post("/accounts/deposit", new AccountAmountRecord(sender.username(), BigInteger.TEN), AccountAmountRecord.class, HttpStatus.OK.value());
 
-        UnitTransferDto transferRequest = new UnitTransferDto(sender.username(), receiver.username(), BigInteger.valueOf(4));
-        UnitTransferDto transferResponse = post("/accounts/transfer", transferRequest, UnitTransferDto.class, HttpStatus.OK.value());
+        UnitTransferRecord transferRequest = new UnitTransferRecord(sender.username(), receiver.username(), BigInteger.valueOf(4));
+        UnitTransferRecord transferResponse = post("/accounts/transfer", transferRequest, UnitTransferRecord.class, HttpStatus.OK.value());
         assertThat(transferResponse).isEqualTo(transferRequest);
 
         BigInteger senderBalance = get("/accounts/balances/sender", BigInteger.class, HttpStatus.OK.value());
@@ -141,12 +139,12 @@ class TinyBankApplicationTest {
         UserRecord firstUser = givenUser("firstUser");
         UserRecord otherUser = givenUser("otherUser");
 
-        post("/accounts/deposit", new AccountAmountDto(otherUser.username(), BigInteger.TEN), AccountAmountDto.class, HttpStatus.OK.value());
-        post("/accounts/deposit", new AccountAmountDto(firstUser.username(), BigInteger.TEN), AccountAmountDto.class, HttpStatus.OK.value());
-        post("/accounts/deposit", new AccountAmountDto(firstUser.username(), BigInteger.valueOf(11)), AccountAmountDto.class, HttpStatus.OK.value());
-        post("/accounts/withdraw", new AccountAmountDto(firstUser.username(), BigInteger.valueOf(2)), AccountAmountDto.class, HttpStatus.OK.value());
-        post("/accounts/transfer", new UnitTransferDto(firstUser.username(), otherUser.username(), BigInteger.valueOf(4)), AccountAmountDto.class, HttpStatus.OK.value());
-        post("/accounts/transfer", new UnitTransferDto(otherUser.username(), firstUser.username(), BigInteger.valueOf(3)), AccountAmountDto.class, HttpStatus.OK.value());
+        post("/accounts/deposit", new AccountAmountRecord(otherUser.username(), BigInteger.TEN), AccountAmountRecord.class, HttpStatus.OK.value());
+        post("/accounts/deposit", new AccountAmountRecord(firstUser.username(), BigInteger.TEN), AccountAmountRecord.class, HttpStatus.OK.value());
+        post("/accounts/deposit", new AccountAmountRecord(firstUser.username(), BigInteger.valueOf(11)), AccountAmountRecord.class, HttpStatus.OK.value());
+        post("/accounts/withdraw", new AccountAmountRecord(firstUser.username(), BigInteger.valueOf(2)), AccountAmountRecord.class, HttpStatus.OK.value());
+        post("/accounts/transfer", new UnitTransferRecord(firstUser.username(), otherUser.username(), BigInteger.valueOf(4)), AccountAmountRecord.class, HttpStatus.OK.value());
+        post("/accounts/transfer", new UnitTransferRecord(otherUser.username(), firstUser.username(), BigInteger.valueOf(3)), AccountAmountRecord.class, HttpStatus.OK.value());
 
         String firstUserTransactionHistoryJson = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/" + firstUser.username() + "/transactions"))
                 .andExpect(status().is(HttpStatus.OK.value()))

@@ -2,8 +2,6 @@ package org.mock.tinybank.domain;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mock.tinybank.dto.AccountAmountDto;
-import org.mock.tinybank.dto.UnitTransferDto;
 import org.mock.tinybank.persistence.TransactionDao;
 import org.mock.tinybank.persistence.TransactionPersistenceService;
 
@@ -40,8 +38,8 @@ class AccountServiceTest {
         when(userService.getUser(username)).thenReturn(user);
         when(transactionPersistenceService.addTransaction(depositTransaction)).thenReturn(depositTransaction);
 
-        AccountAmountDto deposit = new AccountAmountDto(username, TWO);
-        AccountAmountDto actual = accountService.deposit(deposit);
+        AccountAmountRecord deposit = new AccountAmountRecord(username, TWO);
+        AccountAmountRecord actual = accountService.deposit(deposit);
 
         assertThat(actual).isEqualTo(deposit);
     }
@@ -67,7 +65,7 @@ class AccountServiceTest {
         when(userService.getUser(username)).thenReturn(user);
         when(transactionPersistenceService.getTransactions(username)).thenReturn(getMockTransactions());
 
-        AccountAmountDto withdrawal = new AccountAmountDto(username, BigInteger.valueOf(9999));
+        AccountAmountRecord withdrawal = new AccountAmountRecord(username, BigInteger.valueOf(9999));
         assertThatExceptionOfType(InsufficientBalanceException.class)
                 .isThrownBy(() -> accountService.withdraw(withdrawal));
     }
@@ -80,8 +78,8 @@ class AccountServiceTest {
         when(userService.getUser(username)).thenReturn(user);
         when(transactionPersistenceService.addTransaction(withdrawTransaction)).thenReturn(withdrawTransaction);
 
-        AccountAmountDto withdrawal = new AccountAmountDto(username, TWO);
-        AccountAmountDto actual = accountService.withdraw(withdrawal);
+        AccountAmountRecord withdrawal = new AccountAmountRecord(username, TWO);
+        AccountAmountRecord actual = accountService.withdraw(withdrawal);
 
         assertThat(actual).isEqualTo(withdrawal);
     }
@@ -94,9 +92,9 @@ class AccountServiceTest {
         when(userService.getUser(username)).thenReturn(user);
         when(transactionPersistenceService.addTransaction(transferTransactionDao)).thenReturn(transferTransactionDao);
 
-        UnitTransferDto unitTransferDto = new UnitTransferDto(username, otherUser, TWO);
-        UnitTransferDto actual = accountService.transfer(unitTransferDto);
-        assertThat(actual).isEqualTo(unitTransferDto);
+        UnitTransferRecord unitTransferRecord = new UnitTransferRecord(username, otherUser, TWO);
+        UnitTransferRecord actual = accountService.transfer(unitTransferRecord);
+        assertThat(actual).isEqualTo(unitTransferRecord);
     }
 
     @Test
@@ -104,9 +102,9 @@ class AccountServiceTest {
         when(transactionPersistenceService.getTransactions(username)).thenReturn(getMockTransactions());
         when(userService.getUser(username)).thenReturn(user);
 
-        UnitTransferDto unitTransferDto = new UnitTransferDto(username, otherUser, valueOf(999));
+        UnitTransferRecord unitTransferRecord = new UnitTransferRecord(username, otherUser, valueOf(999));
         assertThatExceptionOfType(InsufficientBalanceException.class)
-                .isThrownBy(() -> accountService.transfer(unitTransferDto));
+                .isThrownBy(() -> accountService.transfer(unitTransferRecord));
     }
 
     @Test
