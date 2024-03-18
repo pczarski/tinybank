@@ -2,6 +2,7 @@ package org.mock.tinybank.api;
 
 import org.mock.tinybank.domain.AccountService;
 import org.mock.tinybank.dto.AccountAmountDto;
+import org.mock.tinybank.dto.UnitTransferDto;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
@@ -28,5 +29,10 @@ public class AccountController {
     @GetMapping("/balances/{userName}")
     public BigInteger getBalance(@PathVariable String userName) {
         return accountService.getBalance(userName);
+    }
+
+    @PostMapping("/transfer")
+    public UnitTransferDto transfer(@RequestBody UnitTransferDto transferDto) {
+        return accountService.transfer(transferDto);
     }
 }

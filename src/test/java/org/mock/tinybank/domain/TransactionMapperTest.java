@@ -3,6 +3,7 @@ package org.mock.tinybank.domain;
 import org.junit.jupiter.api.Test;
 import org.mock.tinybank.dto.AccountAmountDto;
 import org.mock.tinybank.dto.TransactionDto;
+import org.mock.tinybank.dto.UnitTransferDto;
 
 import java.math.BigInteger;
 
@@ -36,16 +37,48 @@ class TransactionMapperTest {
     @Test
     void mapFromDtoToAccountTransaction_Deposit() {
         TransactionDto depositDto = new TransactionDto("source", "user", BigInteger.TEN, TransactionType.DEPOSIT);
-        AccountTransaction actual = TransactionMapper.mapFromDtoToAccountTransaction(depositDto);
+        AccountTransaction actual = TransactionMapper.mapFromDtoToAccountTransactionWithdrawalOrDeposit(depositDto, "user");
         AccountTransaction expected = new AccountTransaction(BigInteger.TEN, TransactionType.DEPOSIT);
         assertThat(actual).isEqualTo(expected);
     }
 
     @Test
     void mapFromDtoToAccountTransaction_Withdrawal() {
-        TransactionDto withdrawalDto = new TransactionDto("user", "destination", BigInteger.TEN, TransactionType.WITHDRAWAL);
-        AccountTransaction actual = TransactionMapper.mapFromDtoToAccountTransaction(withdrawalDto);
+        TransactionDto withdrawalDto = new TransactionDto("user", "withdrawal_point", BigInteger.TEN, TransactionType.WITHDRAWAL);
+        AccountTransaction actual = TransactionMapper.mapFromDtoToAccountTransactionWithdrawalOrDeposit(withdrawalDto, "user");
         AccountTransaction expected = new AccountTransaction(BigInteger.TEN.negate(), TransactionType.WITHDRAWAL);
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void mapFromDtoToAccountTransaction_TransferOut() {
+        TransactionDto withdrawalDto = new TransactionDto("user", "someone_else", BigInteger.TEN, TransactionType.TRANSFER);
+        AccountTransaction actual = TransactionMapper.mapFromDtoToAccountTransactionWithdrawalOrDeposit(withdrawalDto, "user");
+        AccountTransaction expected = new AccountTransaction(BigInteger.TEN.negate(), TransactionType.TRANSFER);
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void mapFromDtoToAccountTransaction_TransferIn() {
+        TransactionDto withdrawalDto = new TransactionDto("someone_else", "user", BigInteger.TEN, TransactionType.TRANSFER);
+        AccountTransaction actual = TransactionMapper.mapFromDtoToAccountTransactionWithdrawalOrDeposit(withdrawalDto, "user");
+        AccountTransaction expected = new AccountTransaction(BigInteger.TEN, TransactionType.TRANSFER);
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void mapTransferToTransaction() {
+        UnitTransferDto transferDto = new UnitTransferDto("sender", "recipient", BigInteger.TEN);
+        TransactionDto actual = TransactionMapper.mapTransferToTransaction(transferDto);
+        TransactionDto expected = new TransactionDto("sender", "recipient", BigInteger.TEN, TransactionType.TRANSFER);
+        assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void mapTransactionToTransfer() {
+        TransactionDto inputTransaction = new TransactionDto("sender", "recipient", BigInteger.TWO, TransactionType.TRANSFER);
+        UnitTransferDto actual = TransactionMapper.mapTransactionToTransfer(inputTransaction);
+        UnitTransferDto expected = new UnitTransferDto("sender", "recipient", BigInteger.TWO);
         assertThat(actual).isEqualTo(expected);
     }
 }

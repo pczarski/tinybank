@@ -2,11 +2,11 @@ package org.mock.tinybank.domain;
 
 import org.mock.tinybank.dto.AccountAmountDto;
 import org.mock.tinybank.dto.TransactionDto;
+import org.mock.tinybank.dto.UnitTransferDto;
 
 import java.math.BigInteger;
 
-import static org.mock.tinybank.domain.TransactionType.DEPOSIT;
-import static org.mock.tinybank.domain.TransactionType.WITHDRAWAL;
+import static org.mock.tinybank.domain.TransactionType.*;
 
 class TransactionMapper {
     static final String DEPOSIT_POINT = "DEPOSIT_POINT";
@@ -16,23 +16,28 @@ class TransactionMapper {
         return new TransactionDto(DEPOSIT_POINT, deposit.userName(), deposit.units(), DEPOSIT);
     }
 
-    //todo test
     static TransactionDto mapWithdrawalToTransaction(AccountAmountDto withdrawal) {
         return new TransactionDto(withdrawal.userName(), WITHDRAWAL_POINT, withdrawal.units(), WITHDRAWAL);
     }
 
+    static TransactionDto mapTransferToTransaction(UnitTransferDto transferDto) {
+        return new TransactionDto(transferDto.fromUser(), transferDto.toUser(), transferDto.units(), TRANSFER);
+    }
+
+    static UnitTransferDto mapTransactionToTransfer(TransactionDto transactionDto) {
+        return new UnitTransferDto(transactionDto.fromUser(), transactionDto.toUser(), transactionDto.units());
+    }
     static AccountAmountDto mapTransactionToDepositWithdrawalDto(TransactionDto transactionDto) {
         String userAccount = transactionDto.transactionType() == DEPOSIT ? transactionDto.toUser() : transactionDto.fromUser();
         return new AccountAmountDto(userAccount, transactionDto.units());
     }
 
-    // todo test
-    static AccountTransaction mapFromDtoToAccountTransaction(TransactionDto transactionDto) {
-        BigInteger netAmount = isNetPositiveTransaction(transactionDto) ? transactionDto.units() : transactionDto.units().negate();
+    static AccountTransaction mapFromDtoToAccountTransactionWithdrawalOrDeposit(TransactionDto transactionDto, String username) {
+        BigInteger netAmount = isNetPositiveTransferTransaction(transactionDto, username) ? transactionDto.units() : transactionDto.units().negate();
         return new AccountTransaction(netAmount, transactionDto.transactionType());
     }
 
-    private static boolean isNetPositiveTransaction(TransactionDto transactionDto) {
-        return transactionDto.transactionType() == DEPOSIT;
+    private static boolean isNetPositiveTransferTransaction(TransactionDto transactionDto, String username) {
+        return transactionDto.toUser().equals(username);
     }
 }

@@ -2,6 +2,8 @@ package org.mock.tinybank.domain;
 
 import org.mock.tinybank.dto.AccountAmountDto;
 import org.mock.tinybank.dto.TransactionDto;
+import org.mock.tinybank.dto.UnitTransferDto;
+import org.mock.tinybank.dto.UserDto;
 import org.mock.tinybank.persistence.TransactionPersistenceService;
 import org.springframework.stereotype.Service;
 
@@ -30,20 +32,35 @@ public class AccountService {
 
     //todo test
     public BigInteger getBalance(String userName) {
-        userService.getUser(userName);
+        UserDto userDto = userService.getUser(userName);
         List<TransactionDto> transactions = transactionPersistenceService.getTransactions(userName);
-        User user = new User(transactions.stream().map(TransactionMapper::mapFromDtoToAccountTransaction).toList());
+        User user = new User(transactions.stream().map((transaction) -> TransactionMapper.mapFromDtoToAccountTransactionWithdrawalOrDeposit(transaction, userDto.userName())).toList());
         return user.getBalance();
     }
 
     //todo test
     public AccountAmountDto withdraw(AccountAmountDto withdrawal) {
         BigInteger balance = getBalance(withdrawal.userName());
-        if (balance.subtract(withdrawal.units()).compareTo(BigInteger.ZERO) > 0) {
+        if (isPositive(balance.subtract(withdrawal.units()))) {
             TransactionDto transactionDto = mapWithdrawalToTransaction(withdrawal);
             TransactionDto withdrawalTransaction = transactionPersistenceService.addTransaction(transactionDto);
             return mapTransactionToDepositWithdrawalDto(withdrawalTransaction);
         }
         throw new InsufficientBalanceException();
+    }
+
+    //todo test
+    public UnitTransferDto transfer(UnitTransferDto transactionDto) {
+        userService.getUser(transactionDto.toUser());
+        BigInteger senderBalance = getBalance(transactionDto.fromUser());
+        if (isPositive(senderBalance.subtract(transactionDto.units()))) {
+            TransactionDto transferTransactionDto = transactionPersistenceService.addTransaction(mapTransferToTransaction(transactionDto));
+            return mapTransactionToTransfer(transferTransactionDto);
+        }
+        throw new InsufficientBalanceException();
+    }
+
+    private boolean isPositive(BigInteger value) {
+        return value.compareTo(BigInteger.ZERO) > 0;
     }
 }

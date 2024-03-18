@@ -3,6 +3,7 @@ package org.mock.tinybank;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mock.tinybank.dto.AccountAmountDto;
+import org.mock.tinybank.dto.UnitTransferDto;
 import org.mock.tinybank.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -94,4 +95,20 @@ class TinyBankApplicationTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @Test
+    void transferMoneyToAnotherUser() throws Exception {
+        // Given
+        UserDto sender = givenUser("sender");
+        UserDto receiver = givenUser("receiver");
+        post("/deposit", new AccountAmountDto(sender.userName(), BigInteger.TEN), AccountAmountDto.class, HttpStatus.OK.value());
+
+        UnitTransferDto transferRequest = new UnitTransferDto(sender.userName(), receiver.userName(), BigInteger.valueOf(4));
+        UnitTransferDto transferResponse = post("/transfer", transferRequest, UnitTransferDto.class, HttpStatus.OK.value());
+        assertThat(transferResponse).isEqualTo(transferRequest);
+
+        BigInteger senderBalance = get("/balances/sender", BigInteger.class, HttpStatus.OK.value());
+        BigInteger receiverBalance = get("/balances/receiver", BigInteger.class, HttpStatus.OK.value());
+        assertThat(senderBalance).isEqualTo(6);
+        assertThat(receiverBalance).isEqualTo(4);
+    }
 }
