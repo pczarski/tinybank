@@ -11,11 +11,10 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.math.BigInteger;
-import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mock.tinybank.domain.TransactionType.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -112,21 +111,21 @@ class TinyBankApplicationTest {
     }
 
     private static List<AccountTransaction> getExpectedTransactionsForFirstUserTransactionHistoryGetTest() {
-        List<AccountTransaction> expectedTransactions = new ArrayList<>();
-        expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.TEN, DEPOSIT));
-        expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.valueOf(11), DEPOSIT));
-        expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.valueOf(-2), WITHDRAWAL));
-        expectedTransactions.add(new OutgoingTransfer(BigInteger.valueOf(-4), TRANSFER, "otherUser"));
-        expectedTransactions.add(new IncomingTransfer(BigInteger.valueOf(3), TRANSFER, "otherUser"));
-        return expectedTransactions;
+        return asList(
+                new Deposit(BigInteger.TEN, TransactionType.DEPOSIT),
+                new Deposit(BigInteger.valueOf(11), TransactionType.DEPOSIT),
+                new Withdrawal(BigInteger.valueOf(-2), TransactionType.WITHDRAWAL),
+                new OutgoingTransfer(BigInteger.valueOf(-4), TransactionType.TRANSFER, "otherUser"),
+                new IncomingTransfer(BigInteger.valueOf(3), TransactionType.TRANSFER, "otherUser")
+        );
     }
 
     private static List<AccountTransaction> getExpectedTransactionsForOtherUserTransactionHistoryGetTest() {
-        List<AccountTransaction> expectedTransactions = new ArrayList<>();
-        expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.TEN, DEPOSIT));
-        expectedTransactions.add(new IncomingTransfer(BigInteger.valueOf(4), TRANSFER, "firstUser"));
-        expectedTransactions.add(new OutgoingTransfer(BigInteger.valueOf(-3), TRANSFER, "firstUser"));
-        return expectedTransactions;
+        return asList(
+                new Deposit(BigInteger.TEN, TransactionType.DEPOSIT),
+                new IncomingTransfer(BigInteger.valueOf(4), TransactionType.TRANSFER, "firstUser"),
+                new OutgoingTransfer(BigInteger.valueOf(-3), TransactionType.TRANSFER, "firstUser")
+        );
     }
 
     @Test

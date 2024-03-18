@@ -4,6 +4,4 @@ import java.math.BigInteger;
 
 public interface AccountTransaction {
     BigInteger netUnits();
-
-    TransactionType transactionType();
 }

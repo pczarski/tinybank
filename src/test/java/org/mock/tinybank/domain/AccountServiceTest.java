@@ -127,8 +127,8 @@ class AccountServiceTest {
 
     private List<AccountTransaction> getExpectedMappedTransactions() {
         return List.of(
-                new AccountTransactionWithdrawalOrDeposit(TEN, DEPOSIT),
-                new AccountTransactionWithdrawalOrDeposit(valueOf(-2), WITHDRAWAL),
+                new Deposit(TEN, DEPOSIT),
+                new Withdrawal(valueOf(-2), WITHDRAWAL),
                 new OutgoingTransfer(valueOf(-2), TRANSFER, otherUser),
                 new IncomingTransfer(valueOf(1), TRANSFER, otherUser)
         );
