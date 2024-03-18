@@ -2,8 +2,8 @@ package org.mock.tinybank.dto;
 
 import java.util.Objects;
 
-public record UserDto(String userName) {
+public record UserDto(String username) {
     public UserDto {
-        Objects.requireNonNull(userName);
+        Objects.requireNonNull(username);
     }
 }

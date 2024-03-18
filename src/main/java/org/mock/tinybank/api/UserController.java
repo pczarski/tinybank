@@ -19,8 +19,8 @@ public class UserController {
         return userService.createUser(user);
     }
 
-    @GetMapping("/{userName}")
-    public UserDto getUser(@PathVariable String userName) {
-        return userService.getUser(userName);
+    @GetMapping("/{username}")
+    public UserDto getUser(@PathVariable String username) {
+        return userService.getUser(username);
     }
 }

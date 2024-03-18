@@ -19,10 +19,10 @@ public class TransactionPersistenceService {
         return transactions.get(transactions.size()-1);
     }
 
-    public List<TransactionDto> getTransactions(String userName) {
+    public List<TransactionDto> getTransactions(String username) {
         return transactions
                 .stream()
-                .filter(transactionDto -> transactionDto.fromUser().equals(userName) || transactionDto.toUser().equals(userName))
+                .filter(transactionDto -> transactionDto.fromUser().equals(username) || transactionDto.toUser().equals(username))
                 .toList();
     }
 }

@@ -9,10 +9,10 @@ import org.springframework.stereotype.Service;
 public class UserService {
     private final KeyValueStore<String, UserDto> users = new KeyValueStore<>();
     public UserDto createUser(UserDto user) {
-        return users.put(user.userName(), user);
+        return users.put(user.username(), user);
     }
 
-    public UserDto getUser(String userName) throws EntityNotFoundException {
-        return users.get(userName);
+    public UserDto getUser(String username) throws EntityNotFoundException {
+        return users.get(username);
     }
 }

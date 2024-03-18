@@ -58,38 +58,38 @@ class TinyBankApplicationTest {
         UserDto requestUser = new UserDto("bankUser");
         UserDto postResponseUser = post("/user", requestUser, UserDto.class, HttpStatus.OK.value());
         assertThat(postResponseUser).isEqualTo(requestUser);
-        UserDto getResponseUser = get("/user/"+requestUser.userName(), UserDto.class, HttpStatus.OK.value());
+        UserDto getResponseUser = get("/user/" + requestUser.username(), UserDto.class, HttpStatus.OK.value());
         assertThat(getResponseUser).isEqualTo(requestUser);
     }
 
     @Test
     void depositAndWithdrawal_getsCorrectBalance() throws Exception {
         UserDto givenUser = givenUser("depositor");
-        AccountAmountDto deposit = new AccountAmountDto(givenUser.userName(), BigInteger.TEN);
-        AccountAmountDto depositResponse = post("/deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
+        AccountAmountDto deposit = new AccountAmountDto(givenUser.username(), BigInteger.TEN);
+        AccountAmountDto depositResponse = post("/accounts//deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
 
         assertThat(depositResponse).isEqualTo(deposit);
 
-        post("/deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
-        BigInteger balance = get("/balances/depositor", BigInteger.class, HttpStatus.OK.value());
+        post("/accounts/deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
+        BigInteger balance = get("/accounts/balances/depositor", BigInteger.class, HttpStatus.OK.value());
         assertThat(balance).isEqualTo(20);
 
-        AccountAmountDto withdrawal = new AccountAmountDto(givenUser.userName(), BigInteger.valueOf(5));
-        AccountAmountDto withdrawalResponse = post("/withdraw", withdrawal, AccountAmountDto.class, HttpStatus.OK.value());
+        AccountAmountDto withdrawal = new AccountAmountDto(givenUser.username(), BigInteger.valueOf(5));
+        AccountAmountDto withdrawalResponse = post("/accounts/withdraw", withdrawal, AccountAmountDto.class, HttpStatus.OK.value());
         assertThat(withdrawalResponse).isEqualTo(withdrawal);
 
-        BigInteger newBalance = get("/balances/depositor", BigInteger.class, HttpStatus.OK.value());
+        BigInteger newBalance = get("/accounts/balances/depositor", BigInteger.class, HttpStatus.OK.value());
         assertThat(newBalance).isEqualTo(15);
     }
 
     @Test
     void insufficientBalance_returns400() throws Exception {
         UserDto givenUser = givenUser("someGuy");
-        AccountAmountDto deposit = new AccountAmountDto(givenUser.userName(), BigInteger.TEN);
-        post("/deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
+        AccountAmountDto deposit = new AccountAmountDto(givenUser.username(), BigInteger.TEN);
+        post("/accounts/deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
 
-        AccountAmountDto withdrawal = new AccountAmountDto(givenUser.userName(), BigInteger.valueOf(11));
-        mockMvc.perform(MockMvcRequestBuilders.post("/withdraw")
+        AccountAmountDto withdrawal = new AccountAmountDto(givenUser.username(), BigInteger.valueOf(11));
+        mockMvc.perform(MockMvcRequestBuilders.post("/accounts/withdraw")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(withdrawal)))
                 .andExpect(status().isBadRequest());
@@ -100,14 +100,14 @@ class TinyBankApplicationTest {
         // Given
         UserDto sender = givenUser("sender");
         UserDto receiver = givenUser("receiver");
-        post("/deposit", new AccountAmountDto(sender.userName(), BigInteger.TEN), AccountAmountDto.class, HttpStatus.OK.value());
+        post("/accounts/deposit", new AccountAmountDto(sender.username(), BigInteger.TEN), AccountAmountDto.class, HttpStatus.OK.value());
 
-        UnitTransferDto transferRequest = new UnitTransferDto(sender.userName(), receiver.userName(), BigInteger.valueOf(4));
-        UnitTransferDto transferResponse = post("/transfer", transferRequest, UnitTransferDto.class, HttpStatus.OK.value());
+        UnitTransferDto transferRequest = new UnitTransferDto(sender.username(), receiver.username(), BigInteger.valueOf(4));
+        UnitTransferDto transferResponse = post("/accounts/transfer", transferRequest, UnitTransferDto.class, HttpStatus.OK.value());
         assertThat(transferResponse).isEqualTo(transferRequest);
 
-        BigInteger senderBalance = get("/balances/sender", BigInteger.class, HttpStatus.OK.value());
-        BigInteger receiverBalance = get("/balances/receiver", BigInteger.class, HttpStatus.OK.value());
+        BigInteger senderBalance = get("/accounts/balances/sender", BigInteger.class, HttpStatus.OK.value());
+        BigInteger receiverBalance = get("/accounts/balances/receiver", BigInteger.class, HttpStatus.OK.value());
         assertThat(senderBalance).isEqualTo(6);
         assertThat(receiverBalance).isEqualTo(4);
     }

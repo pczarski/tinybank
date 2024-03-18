@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigInteger;
 
 @RestController
+@RequestMapping("/accounts")
 public class AccountController {
 
     private final AccountService accountService;
@@ -26,13 +27,14 @@ public class AccountController {
         return accountService.withdraw(withdrawal);
     }
 
-    @GetMapping("/balances/{userName}")
-    public BigInteger getBalance(@PathVariable String userName) {
-        return accountService.getBalance(userName);
+    @GetMapping("/balances/{username}")
+    public BigInteger getBalance(@PathVariable String username) {
+        return accountService.getBalance(username);
     }
 
     @PostMapping("/transfer")
     public UnitTransferDto transfer(@RequestBody UnitTransferDto transferDto) {
         return accountService.transfer(transferDto);
     }
+
 }

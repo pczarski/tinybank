@@ -25,22 +25,22 @@ public class AccountService {
     }
 
     public AccountAmountDto deposit(AccountAmountDto deposit) {
-        userService.getUser(deposit.userName());
+        userService.getUser(deposit.username());
         TransactionDto transactionDto = transactionPersistenceService.addTransaction(mapDepositToTransaction(deposit));
         return mapTransactionToDepositWithdrawalDto(transactionDto);
     }
 
     //todo test
-    public BigInteger getBalance(String userName) {
-        UserDto userDto = userService.getUser(userName);
-        List<TransactionDto> transactions = transactionPersistenceService.getTransactions(userName);
-        User user = new User(transactions.stream().map((transaction) -> TransactionMapper.mapFromDtoToAccountTransactionWithdrawalOrDeposit(transaction, userDto.userName())).toList());
+    public BigInteger getBalance(String username) {
+        UserDto userDto = userService.getUser(username);
+        List<TransactionDto> transactions = transactionPersistenceService.getTransactions(username);
+        User user = new User(transactions.stream().map((transaction) -> TransactionMapper.mapFromDtoToAccountTransactionWithdrawalOrDeposit(transaction, userDto.username())).toList());
         return user.getBalance();
     }
 
     //todo test
     public AccountAmountDto withdraw(AccountAmountDto withdrawal) {
-        BigInteger balance = getBalance(withdrawal.userName());
+        BigInteger balance = getBalance(withdrawal.username());
         if (isPositive(balance.subtract(withdrawal.units()))) {
             TransactionDto transactionDto = mapWithdrawalToTransaction(withdrawal);
             TransactionDto withdrawalTransaction = transactionPersistenceService.addTransaction(transactionDto);

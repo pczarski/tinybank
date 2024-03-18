@@ -13,11 +13,11 @@ class TransactionMapper {
     static final String WITHDRAWAL_POINT = "WITHDRAWAL_POINT";
 
     static TransactionDto mapDepositToTransaction(AccountAmountDto deposit) {
-        return new TransactionDto(DEPOSIT_POINT, deposit.userName(), deposit.units(), DEPOSIT);
+        return new TransactionDto(DEPOSIT_POINT, deposit.username(), deposit.units(), DEPOSIT);
     }
 
     static TransactionDto mapWithdrawalToTransaction(AccountAmountDto withdrawal) {
-        return new TransactionDto(withdrawal.userName(), WITHDRAWAL_POINT, withdrawal.units(), WITHDRAWAL);
+        return new TransactionDto(withdrawal.username(), WITHDRAWAL_POINT, withdrawal.units(), WITHDRAWAL);
     }
 
     static TransactionDto mapTransferToTransaction(UnitTransferDto transferDto) {
