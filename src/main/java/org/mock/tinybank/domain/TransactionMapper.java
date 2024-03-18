@@ -33,7 +33,7 @@ class TransactionMapper {
     }
 
     static AccountTransaction toAccountTransactionWithdrawalOrDeposit(TransactionDao transactionDao, String selectedUsername) {
-        boolean isIncomingTransactionType = isIncomingTransactionType(transactionDao, selectedUsername);
+        var isIncomingTransactionType = isIncomingTransactionType(transactionDao, selectedUsername);
         BigInteger netAmount = isIncomingTransactionType ? transactionDao.units() : transactionDao.units().negate();
         if (transactionDao.transactionType() == TRANSFER) {
             String targetUserName = isIncomingTransactionType ? transactionDao.fromUser() : transactionDao.toUser();

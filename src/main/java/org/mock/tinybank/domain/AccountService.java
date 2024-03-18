@@ -1,5 +1,6 @@
 package org.mock.tinybank.domain;
 
+import lombok.RequiredArgsConstructor;
 import org.mock.tinybank.persistence.TransactionDao;
 import org.mock.tinybank.persistence.TransactionPersistenceService;
 import org.springframework.stereotype.Service;
@@ -10,16 +11,12 @@ import java.util.List;
 import static org.mock.tinybank.domain.TransactionMapper.*;
 
 @Service
+@RequiredArgsConstructor
 public class AccountService {
 
     private final UserService userService;
 
     private final TransactionPersistenceService transactionPersistenceService;
-
-    public AccountService(UserService userService, TransactionPersistenceService transactionPersistenceService) {
-        this.userService = userService;
-        this.transactionPersistenceService = transactionPersistenceService;
-    }
 
     public AccountAmountRecord deposit(AccountAmountRecord deposit) {
         userService.getUser(deposit.username());

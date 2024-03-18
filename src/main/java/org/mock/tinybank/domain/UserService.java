@@ -16,7 +16,6 @@ public class UserService {
         return users.get(username);
     }
 
-    // todo test
     public UserRecord deactivateUser(String username) {
         return users.delete(username);
     }
