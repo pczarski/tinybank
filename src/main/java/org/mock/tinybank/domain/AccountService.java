@@ -30,14 +30,12 @@ public class AccountService {
         return mapTransactionToDepositWithdrawalDto(transactionDto);
     }
 
-    //todo test
     public BigInteger getBalance(String username) {
         UserDto userDto = userService.getUser(username);
         User user = constructUser(userDto.username());
         return user.getBalance();
     }
 
-    //todo test
     public AccountAmountDto withdraw(AccountAmountDto withdrawal) {
         BigInteger balance = getBalance(withdrawal.username());
         if (isPositive(balance.subtract(withdrawal.units()))) {
