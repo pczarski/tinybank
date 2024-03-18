@@ -1,8 +1,8 @@
 package org.mock.tinybank.domain;
 
 import org.mock.tinybank.dto.AccountAmountDto;
-import org.mock.tinybank.dto.TransactionDto;
 import org.mock.tinybank.dto.UnitTransferDto;
+import org.mock.tinybank.persistence.TransactionDao;
 
 import java.math.BigInteger;
 
@@ -13,37 +13,38 @@ class TransactionMapper {
     static final String DEPOSIT_POINT = "DEPOSIT_POINT";
     static final String WITHDRAWAL_POINT = "WITHDRAWAL_POINT";
 
-    static TransactionDto mapDepositToTransaction(AccountAmountDto deposit) {
-        return new TransactionDto(DEPOSIT_POINT, deposit.username(), deposit.units(), DEPOSIT);
+    static TransactionDao depositToTransaction(AccountAmountDto deposit) {
+        return new TransactionDao(DEPOSIT_POINT, deposit.username(), deposit.units(), DEPOSIT);
     }
 
-    static TransactionDto mapWithdrawalToTransaction(AccountAmountDto withdrawal) {
-        return new TransactionDto(withdrawal.username(), WITHDRAWAL_POINT, withdrawal.units(), WITHDRAWAL);
+    static TransactionDao withdrawalToTransaction(AccountAmountDto withdrawal) {
+        return new TransactionDao(withdrawal.username(), WITHDRAWAL_POINT, withdrawal.units(), WITHDRAWAL);
     }
 
-    static TransactionDto mapTransferToTransaction(UnitTransferDto transferDto) {
-        return new TransactionDto(transferDto.fromUser(), transferDto.toUser(), transferDto.units(), TRANSFER);
+    static TransactionDao toTransaction(UnitTransferDto transferDto) {
+        return new TransactionDao(transferDto.fromUser(), transferDto.toUser(), transferDto.units(), TRANSFER);
     }
 
-    static UnitTransferDto mapTransactionToTransfer(TransactionDto transactionDto) {
-        return new UnitTransferDto(transactionDto.fromUser(), transactionDto.toUser(), transactionDto.units());
-    }
-    static AccountAmountDto mapTransactionToDepositWithdrawalDto(TransactionDto transactionDto) {
-        String userAccount = transactionDto.transactionType() == DEPOSIT ? transactionDto.toUser() : transactionDto.fromUser();
-        return new AccountAmountDto(userAccount, transactionDto.units());
+    static UnitTransferDto toTransfer(TransactionDao transactionDao) {
+        return new UnitTransferDto(transactionDao.fromUser(), transactionDao.toUser(), transactionDao.units());
     }
 
-    static AccountTransaction mapFromDtoToAccountTransactionWithdrawalOrDeposit(TransactionDto transactionDto, String selectedUsername) {
-        boolean isIncomingTransactionType = isIncomingTransactionType(transactionDto, selectedUsername);
-        BigInteger netAmount = isIncomingTransactionType ? transactionDto.units() : transactionDto.units().negate();
-        if (transactionDto.transactionType() == TRANSFER) {
-            String targetUserName = isIncomingTransactionType ? transactionDto.fromUser() : transactionDto.toUser();
+    static AccountAmountDto toDepositWithdrawalDto(TransactionDao transactionDao) {
+        String userAccount = transactionDao.transactionType() == DEPOSIT ? transactionDao.toUser() : transactionDao.fromUser();
+        return new AccountAmountDto(userAccount, transactionDao.units());
+    }
+
+    static AccountTransaction toAccountTransactionWithdrawalOrDeposit(TransactionDao transactionDao, String selectedUsername) {
+        boolean isIncomingTransactionType = isIncomingTransactionType(transactionDao, selectedUsername);
+        BigInteger netAmount = isIncomingTransactionType ? transactionDao.units() : transactionDao.units().negate();
+        if (transactionDao.transactionType() == TRANSFER) {
+            String targetUserName = isIncomingTransactionType ? transactionDao.fromUser() : transactionDao.toUser();
             return isIncomingTransactionType ? new AccountTransactionIncomingTransfer(netAmount, TRANSFER, targetUserName) : new AccountTransactionOutgoingTransfer(netAmount, TRANSFER, targetUserName);
         }
-        return new AccountTransactionWithdrawalOrDeposit(netAmount, transactionDto.transactionType());
+        return new AccountTransactionWithdrawalOrDeposit(netAmount, transactionDao.transactionType());
     }
 
-    private static boolean isIncomingTransactionType(TransactionDto transactionDto, String username) {
-        return transactionDto.toUser().equals(username);
+    private static boolean isIncomingTransactionType(TransactionDao transactionDao, String username) {
+        return transactionDao.toUser().equals(username);
     }
 }

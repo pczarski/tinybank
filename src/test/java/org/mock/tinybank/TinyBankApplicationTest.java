@@ -2,13 +2,9 @@ package org.mock.tinybank;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mock.tinybank.domain.AccountTransaction;
-import org.mock.tinybank.domain.AccountTransactionIncomingTransfer;
-import org.mock.tinybank.domain.AccountTransactionOutgoingTransfer;
-import org.mock.tinybank.domain.AccountTransactionWithdrawalOrDeposit;
+import org.mock.tinybank.domain.*;
 import org.mock.tinybank.dto.AccountAmountDto;
 import org.mock.tinybank.dto.UnitTransferDto;
-import org.mock.tinybank.dto.UserDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,24 +38,24 @@ class TinyBankApplicationTest {
 
     @Test
     void createUser() throws Exception {
-        UserDto requestUser = new UserDto("bankUser");
-        UserDto postResponseUser = post("/users", requestUser, UserDto.class, HttpStatus.OK.value());
+        UserRecord requestUser = new UserRecord("bankUser");
+        UserRecord postResponseUser = post("/users", requestUser, UserRecord.class, HttpStatus.OK.value());
         assertThat(postResponseUser).isEqualTo(requestUser);
-        UserDto getResponseUser = get("/users/" + requestUser.username(), UserDto.class, HttpStatus.OK.value());
+        UserRecord getResponseUser = get("/users/" + requestUser.username(), UserRecord.class, HttpStatus.OK.value());
         assertThat(getResponseUser).isEqualTo(requestUser);
     }
 
     @Test
     void deactivateUser() throws Exception {
         givenUser("existing_user");
-        UserDto userToDelete = givenUser("to_delete");
+        UserRecord userToDelete = givenUser("to_delete");
 
         String response = mockMvc.perform(MockMvcRequestBuilders
                         .delete("/users/to_delete"))
                 .andExpect(status().is2xxSuccessful())
                 .andReturn().getResponse().getContentAsString();
 
-        UserDto deletedUser = objectMapper.readValue(response, UserDto.class);
+        UserRecord deletedUser = objectMapper.readValue(response, UserRecord.class);
         assertThat(deletedUser)
                 .isEqualTo(userToDelete);
 
@@ -70,7 +66,7 @@ class TinyBankApplicationTest {
 
     @Test
     void depositAndWithdrawal_getsCorrectBalance() throws Exception {
-        UserDto givenUser = givenUser("depositor");
+        UserRecord givenUser = givenUser("depositor");
         AccountAmountDto deposit = new AccountAmountDto(givenUser.username(), BigInteger.TEN);
         AccountAmountDto depositResponse = post("/accounts//deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
 
@@ -90,7 +86,7 @@ class TinyBankApplicationTest {
 
     @Test
     void insufficientBalance_returns400() throws Exception {
-        UserDto givenUser = givenUser("someGuy");
+        UserRecord givenUser = givenUser("someGuy");
         AccountAmountDto deposit = new AccountAmountDto(givenUser.username(), BigInteger.TEN);
         post("/accounts/deposit", deposit, AccountAmountDto.class, HttpStatus.OK.value());
 
@@ -103,8 +99,8 @@ class TinyBankApplicationTest {
 
     @Test
     void transferMoneyToAnotherUser() throws Exception {
-        UserDto sender = givenUser("sender");
-        UserDto receiver = givenUser("receiver");
+        UserRecord sender = givenUser("sender");
+        UserRecord receiver = givenUser("receiver");
         post("/accounts/deposit", new AccountAmountDto(sender.username(), BigInteger.TEN), AccountAmountDto.class, HttpStatus.OK.value());
 
         UnitTransferDto transferRequest = new UnitTransferDto(sender.username(), receiver.username(), BigInteger.valueOf(4));
@@ -142,8 +138,8 @@ class TinyBankApplicationTest {
 
     @Test
     void getTransactionsForAUser() throws Exception {
-        UserDto firstUser = givenUser("firstUser");
-        UserDto otherUser = givenUser("otherUser");
+        UserRecord firstUser = givenUser("firstUser");
+        UserRecord otherUser = givenUser("otherUser");
 
         post("/accounts/deposit", new AccountAmountDto(otherUser.username(), BigInteger.TEN), AccountAmountDto.class, HttpStatus.OK.value());
         post("/accounts/deposit", new AccountAmountDto(firstUser.username(), BigInteger.TEN), AccountAmountDto.class, HttpStatus.OK.value());
@@ -186,8 +182,8 @@ class TinyBankApplicationTest {
         return objectMapper.readValue(response, resposneClass);
     }
 
-    private UserDto givenUser(String username) throws Exception {
-        UserDto requestUser = new UserDto(username);
-        return post("/users", requestUser, UserDto.class, HttpStatus.OK.value());
+    private UserRecord givenUser(String username) throws Exception {
+        UserRecord requestUser = new UserRecord(username);
+        return post("/users", requestUser, UserRecord.class, HttpStatus.OK.value());
     }
 }

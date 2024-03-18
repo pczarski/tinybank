@@ -1,13 +1,13 @@
 package org.mock.tinybank.user;
 
 import org.junit.jupiter.api.Test;
-import org.mock.tinybank.dto.UserDto;
+import org.mock.tinybank.domain.UserRecord;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class UserDtoTest {
+class UserRecordTest {
     @Test
     void usernameCannotBeNull() {
-        assertThrows(NullPointerException.class, () -> new UserDto(null));
+        assertThrows(NullPointerException.class, () -> new UserRecord(null));
     }
 }

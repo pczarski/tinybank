@@ -1,9 +1,8 @@
 package org.mock.tinybank.domain;
 
 import org.mock.tinybank.dto.AccountAmountDto;
-import org.mock.tinybank.dto.TransactionDto;
 import org.mock.tinybank.dto.UnitTransferDto;
-import org.mock.tinybank.dto.UserDto;
+import org.mock.tinybank.persistence.TransactionDao;
 import org.mock.tinybank.persistence.TransactionPersistenceService;
 import org.springframework.stereotype.Service;
 
@@ -26,22 +25,22 @@ public class AccountService {
 
     public AccountAmountDto deposit(AccountAmountDto deposit) {
         userService.getUser(deposit.username());
-        TransactionDto transactionDto = transactionPersistenceService.addTransaction(mapDepositToTransaction(deposit));
-        return mapTransactionToDepositWithdrawalDto(transactionDto);
+        TransactionDao transactionDao = transactionPersistenceService.addTransaction(depositToTransaction(deposit));
+        return toDepositWithdrawalDto(transactionDao);
     }
 
     public BigInteger getBalance(String username) {
-        UserDto userDto = userService.getUser(username);
-        User user = constructUser(userDto.username());
+        UserRecord userRecord = userService.getUser(username);
+        User user = constructUser(userRecord.username());
         return user.getBalance();
     }
 
     public AccountAmountDto withdraw(AccountAmountDto withdrawal) {
         BigInteger balance = getBalance(withdrawal.username());
         if (isPositive(balance.subtract(withdrawal.units()))) {
-            TransactionDto transactionDto = mapWithdrawalToTransaction(withdrawal);
-            TransactionDto withdrawalTransaction = transactionPersistenceService.addTransaction(transactionDto);
-            return mapTransactionToDepositWithdrawalDto(withdrawalTransaction);
+            TransactionDao transactionDao = withdrawalToTransaction(withdrawal);
+            TransactionDao withdrawalTransaction = transactionPersistenceService.addTransaction(transactionDao);
+            return toDepositWithdrawalDto(withdrawalTransaction);
         }
         throw new InsufficientBalanceException();
     }
@@ -50,8 +49,8 @@ public class AccountService {
         userService.getUser(transactionDto.toUser()); //this could be a filter
         BigInteger senderBalance = getBalance(transactionDto.fromUser());
         if (isPositive(senderBalance.subtract(transactionDto.units()))) {
-            TransactionDto transferTransactionDto = transactionPersistenceService.addTransaction(mapTransferToTransaction(transactionDto));
-            return mapTransactionToTransfer(transferTransactionDto);
+            TransactionDao transferTransactionDao = transactionPersistenceService.addTransaction(toTransaction(transactionDto));
+            return toTransfer(transferTransactionDao);
         }
         throw new InsufficientBalanceException();
     }
@@ -62,8 +61,8 @@ public class AccountService {
     }
 
     private User constructUser(String username) {
-        List<TransactionDto> transactions = transactionPersistenceService.getTransactions(username);
-        return new User(transactions.stream().map((transaction) -> TransactionMapper.mapFromDtoToAccountTransactionWithdrawalOrDeposit(transaction, username)).toList());
+        List<TransactionDao> transactions = transactionPersistenceService.getTransactions(username);
+        return new User(transactions.stream().map((transaction) -> TransactionMapper.toAccountTransactionWithdrawalOrDeposit(transaction, username)).toList());
     }
 
     private boolean isPositive(BigInteger value) {

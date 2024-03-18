@@ -3,9 +3,8 @@ package org.mock.tinybank.domain;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mock.tinybank.dto.AccountAmountDto;
-import org.mock.tinybank.dto.TransactionDto;
 import org.mock.tinybank.dto.UnitTransferDto;
-import org.mock.tinybank.dto.UserDto;
+import org.mock.tinybank.persistence.TransactionDao;
 import org.mock.tinybank.persistence.TransactionPersistenceService;
 
 import java.math.BigInteger;
@@ -26,7 +25,7 @@ class AccountServiceTest {
     private final TransactionPersistenceService transactionPersistenceService = mock(TransactionPersistenceService.class);
     private AccountService accountService;
     private final String username = "banker_man";
-    private final UserDto user = new UserDto(username);
+    private final UserRecord user = new UserRecord(username);
     private final String otherUser = "otheruser";
 
     @BeforeEach
@@ -36,7 +35,7 @@ class AccountServiceTest {
 
     @Test
     void deposit() {
-        TransactionDto depositTransaction = new TransactionDto("DEPOSIT_POINT", username, TWO, DEPOSIT);
+        TransactionDao depositTransaction = new TransactionDao("DEPOSIT_POINT", username, TWO, DEPOSIT);
 
         when(userService.getUser(username)).thenReturn(user);
         when(transactionPersistenceService.addTransaction(depositTransaction)).thenReturn(depositTransaction);
@@ -75,7 +74,7 @@ class AccountServiceTest {
 
     @Test
     void withdraw() {
-        TransactionDto withdrawTransaction = new TransactionDto(username, "WITHDRAWAL_POINT", TWO, WITHDRAWAL);
+        TransactionDao withdrawTransaction = new TransactionDao(username, "WITHDRAWAL_POINT", TWO, WITHDRAWAL);
 
         when(transactionPersistenceService.getTransactions(username)).thenReturn(getMockTransactions());
         when(userService.getUser(username)).thenReturn(user);
@@ -89,11 +88,11 @@ class AccountServiceTest {
 
     @Test
     void transfer() {
-        TransactionDto transferTransactionDto = new TransactionDto(username, otherUser, TWO, TRANSFER);
+        TransactionDao transferTransactionDao = new TransactionDao(username, otherUser, TWO, TRANSFER);
 
         when(transactionPersistenceService.getTransactions(username)).thenReturn(getMockTransactions());
         when(userService.getUser(username)).thenReturn(user);
-        when(transactionPersistenceService.addTransaction(transferTransactionDto)).thenReturn(transferTransactionDto);
+        when(transactionPersistenceService.addTransaction(transferTransactionDao)).thenReturn(transferTransactionDao);
 
         UnitTransferDto unitTransferDto = new UnitTransferDto(username, otherUser, TWO);
         UnitTransferDto actual = accountService.transfer(unitTransferDto);
@@ -118,12 +117,12 @@ class AccountServiceTest {
         assertThat(actual).isEqualTo(getExpectedMappedTransactions());
     }
 
-    private List<TransactionDto> getMockTransactions() {
+    private List<TransactionDao> getMockTransactions() {
         return List.of(
-                new TransactionDto("DEPOSIT_POINT", username, TEN, DEPOSIT),
-                new TransactionDto(username, "WITHDRAWAL_POINT", TWO, WITHDRAWAL),
-                new TransactionDto(username, otherUser, TWO, TRANSFER),
-                new TransactionDto(otherUser, username, ONE, TRANSFER)
+                new TransactionDao("DEPOSIT_POINT", username, TEN, DEPOSIT),
+                new TransactionDao(username, "WITHDRAWAL_POINT", TWO, WITHDRAWAL),
+                new TransactionDao(username, otherUser, TWO, TRANSFER),
+                new TransactionDao(otherUser, username, ONE, TRANSFER)
                 // 10 - 2 - 2 + 1 = 7
         );
     }

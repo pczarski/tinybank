@@ -3,7 +3,6 @@ package org.mock.tinybank.persistence;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mock.tinybank.domain.TransactionType;
-import org.mock.tinybank.dto.TransactionDto;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -22,31 +21,31 @@ class TransactionPersistenceServiceTest {
 
     @Test
     void addTransaction() {
-        TransactionDto toAdd = new TransactionDto("from_me", "to_you", BigInteger.TEN, DEPOSIT);
-        TransactionDto actual = transactionPersistenceService.addTransaction(toAdd);
+        TransactionDao toAdd = new TransactionDao("from_me", "to_you", BigInteger.TEN, DEPOSIT);
+        TransactionDao actual = transactionPersistenceService.addTransaction(toAdd);
         assertThat(actual).isEqualTo(toAdd);
     }
 
     @Test
     void getTransactions_ReturnsCorrectTransactions() {
-        TransactionDto myTransaction1 = new TransactionDto("this_is_me", "this_is_not_me", BigInteger.TEN, TransactionType.DEPOSIT);
-        TransactionDto myTransaction2 = new TransactionDto("also_not_me", "this_is_me", BigInteger.valueOf(20), TransactionType.WITHDRAWAL);
-        TransactionDto transaction3 = new TransactionDto("not_me", "not_me2", BigInteger.valueOf(20), TransactionType.WITHDRAWAL);
+        TransactionDao myTransaction1 = new TransactionDao("this_is_me", "this_is_not_me", BigInteger.TEN, TransactionType.DEPOSIT);
+        TransactionDao myTransaction2 = new TransactionDao("also_not_me", "this_is_me", BigInteger.valueOf(20), TransactionType.WITHDRAWAL);
+        TransactionDao transaction3 = new TransactionDao("not_me", "not_me2", BigInteger.valueOf(20), TransactionType.WITHDRAWAL);
         transactionPersistenceService.addTransaction(myTransaction1);
         transactionPersistenceService.addTransaction(myTransaction2);
         transactionPersistenceService.addTransaction(transaction3);
 
-        List<TransactionDto> myTransactions = transactionPersistenceService.getTransactions("this_is_me");
+        List<TransactionDao> myTransactions = transactionPersistenceService.getTransactions("this_is_me");
 
         assertThat(myTransactions).hasSize(2).containsAll(List.of(myTransaction1, myTransaction2));
     }
 
     @Test
     void getTransactions_ReturnsEmptyListForNonexistentUser() {
-        TransactionDto transaction1 = new TransactionDto("some_person", "another_person", BigInteger.TEN, TransactionType.DEPOSIT);
+        TransactionDao transaction1 = new TransactionDao("some_person", "another_person", BigInteger.TEN, TransactionType.DEPOSIT);
         transactionPersistenceService.addTransaction(transaction1);
 
-        List<TransactionDto> nonExistentUserTransactions = transactionPersistenceService.getTransactions("not_existing_person");
+        List<TransactionDao> nonExistentUserTransactions = transactionPersistenceService.getTransactions("not_existing_person");
 
         assertThat(nonExistentUserTransactions).isEmpty();
     }

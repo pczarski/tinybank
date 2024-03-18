@@ -1,12 +1,12 @@
 package org.mock.tinybank.persistence;
 
-import java.util.Hashtable;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class KeyValueStore<K,V> {
-    private final Hashtable<K,V> hashtable;
+    private final ConcurrentHashMap<K, V> hashtable;
 
     public KeyValueStore() {
-        this.hashtable = new Hashtable<>();
+        this.hashtable = new ConcurrentHashMap<>();
     }
 
     public V put(K key, V value) {
