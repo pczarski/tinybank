@@ -6,7 +6,6 @@ import java.util.List;
 
 public record User(List<AccountTransaction> transactions) {
 
-    // todo test
     public BigInteger getBalance() {
         return transactions.stream()
                 .map(AccountTransaction::netUnits)
