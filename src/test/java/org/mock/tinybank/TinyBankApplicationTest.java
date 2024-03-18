@@ -17,11 +17,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mock.tinybank.domain.TransactionType.DEPOSIT;
-import static org.mock.tinybank.domain.TransactionType.WITHDRAWAL;
+import static org.mock.tinybank.domain.TransactionType.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
@@ -117,6 +117,24 @@ class TinyBankApplicationTest {
         assertThat(receiverBalance).isEqualTo(4);
     }
 
+    private static List<AccountTransaction> getExpectedTransactionsForFirstUserTransactionHistoryGetTest() {
+        List<AccountTransaction> expectedTransactions = new ArrayList<>();
+        expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.TEN, DEPOSIT));
+        expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.valueOf(11), DEPOSIT));
+        expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.valueOf(-2), WITHDRAWAL));
+        expectedTransactions.add(new AccountTransactionOutgoingTransfer(BigInteger.valueOf(-4), TRANSFER, "otherUser"));
+        expectedTransactions.add(new AccountTransactionIncomingTransfer(BigInteger.valueOf(3), TRANSFER, "otherUser"));
+        return expectedTransactions;
+    }
+
+    private static List<AccountTransaction> getExpectedTransactionsForOtherUserTransactionHistoryGetTest() {
+        List<AccountTransaction> expectedTransactions = new ArrayList<>();
+        expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.TEN, DEPOSIT));
+        expectedTransactions.add(new AccountTransactionIncomingTransfer(BigInteger.valueOf(4), TRANSFER, "firstUser"));
+        expectedTransactions.add(new AccountTransactionOutgoingTransfer(BigInteger.valueOf(-3), TRANSFER, "firstUser"));
+        return expectedTransactions;
+    }
+
     @Test
     void getEmptyTransactions() throws Exception {
         givenUser("firstUser");
@@ -152,23 +170,7 @@ class TinyBankApplicationTest {
         assertThat(otherUserTransactionHistoryJson).isEqualTo(expectedOtherUserTransactionsJson);
     }
 
-    private static List<AccountTransaction> getExpectedTransactionsForFirstUserTransactionHistoryGetTest() {
-        return List.of(new AccountTransactionWithdrawalOrDeposit(BigInteger.TEN, DEPOSIT),
-                new AccountTransactionWithdrawalOrDeposit(BigInteger.valueOf(11), DEPOSIT),
-                new AccountTransactionWithdrawalOrDeposit(BigInteger.valueOf(-2), WITHDRAWAL),
-                new AccountTransactionOutgoingTransfer(BigInteger.valueOf(-4), "otherUser"),
-                new AccountTransactionIncomingTransfer(BigInteger.valueOf(3), "otherUser")
-        );
-    }
-
-    private static List<AccountTransaction> getExpectedTransactionsForOtherUserTransactionHistoryGetTest() {
-        return List.of(new AccountTransactionWithdrawalOrDeposit(BigInteger.TEN, DEPOSIT),
-                new AccountTransactionIncomingTransfer(BigInteger.valueOf(4), "firstUser"),
-                new AccountTransactionOutgoingTransfer(BigInteger.valueOf(-3), "firstUser")
-        );
-    }
-
-
+    //        List<AccountTransaction> transactions = objectMapper.readValue(response, objectMapper.getTypeFactory().constructCollectionType(List.class, AccountTransaction.class));
     private <T> T post(String path, Object request, Class<T> resposneClass, int expectedCode) throws Exception {
         String response = mockMvc.perform(MockMvcRequestBuilders.post(path)
                         .contentType("application/json")
