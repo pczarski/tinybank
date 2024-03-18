@@ -110,6 +110,14 @@ class AccountServiceTest {
                 .isThrownBy(() -> accountService.transfer(unitTransferDto));
     }
 
+    @Test
+    void testGetTransactions() {
+        when(userService.getUser(username)).thenReturn(user);
+        when(transactionPersistenceService.getTransactions(username)).thenReturn(getMockTransactions());
+        List<AccountTransaction> actual = accountService.getTransactions(username);
+        assertThat(actual).isEqualTo(getExpectedMappedTransactions());
+    }
+
     private List<TransactionDto> getMockTransactions() {
         return List.of(
                 new TransactionDto("DEPOSIT_POINT", username, TEN, DEPOSIT),
@@ -117,6 +125,15 @@ class AccountServiceTest {
                 new TransactionDto(username, otherUser, TWO, TRANSFER),
                 new TransactionDto(otherUser, username, ONE, TRANSFER)
                 // 10 - 2 - 2 + 1 = 7
+        );
+    }
+
+    private List<AccountTransaction> getExpectedMappedTransactions() {
+        return List.of(
+                new AccountTransactionWithdrawalOrDeposit(TEN, DEPOSIT),
+                new AccountTransactionWithdrawalOrDeposit(valueOf(-2), WITHDRAWAL),
+                new AccountTransactionOutgoingTransfer(valueOf(-2), TRANSFER, otherUser),
+                new AccountTransactionIncomingTransfer(valueOf(1), TRANSFER, otherUser)
         );
     }
 }
