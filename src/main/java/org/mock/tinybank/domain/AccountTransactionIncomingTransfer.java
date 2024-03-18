@@ -2,6 +2,10 @@ package org.mock.tinybank.domain;
 
 import java.math.BigInteger;
 
-public record AccountTransactionIncomingTransfer(BigInteger netUnits, TransactionType transactionType,
-                                                 String sender) implements AccountTransaction {
+import static org.mock.tinybank.domain.TransactionType.TRANSFER;
+
+public record AccountTransactionIncomingTransfer(BigInteger netUnits, String sender) implements AccountTransaction {
+    public TransactionType transactionType() {
+        return TRANSFER;
+    }
 }

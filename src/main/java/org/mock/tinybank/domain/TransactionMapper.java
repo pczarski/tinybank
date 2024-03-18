@@ -38,7 +38,7 @@ class TransactionMapper {
         BigInteger netAmount = isIncomingTransactionType ? transactionDto.units() : transactionDto.units().negate();
         if (transactionDto.transactionType() == TRANSFER) {
             String targetUserName = isIncomingTransactionType ? transactionDto.fromUser() : transactionDto.toUser();
-            return isIncomingTransactionType ? new AccountTransactionIncomingTransfer(netAmount, TRANSFER, targetUserName) : new AccountTransactionOutgoingTransfer(netAmount, TRANSFER, targetUserName);
+            return isIncomingTransactionType ? new AccountTransactionIncomingTransfer(netAmount, targetUserName) : new AccountTransactionOutgoingTransfer(netAmount, targetUserName);
         }
         return new AccountTransactionWithdrawalOrDeposit(netAmount, transactionDto.transactionType());
     }

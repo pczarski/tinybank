@@ -46,7 +46,6 @@ public class AccountService {
         throw new InsufficientBalanceException();
     }
 
-    //todo test
     public UnitTransferDto transfer(UnitTransferDto transactionDto) {
         userService.getUser(transactionDto.toUser()); //this could be a filter
         BigInteger senderBalance = getBalance(transactionDto.fromUser());
@@ -57,7 +56,6 @@ public class AccountService {
         throw new InsufficientBalanceException();
     }
 
-    //todo test
     public List<AccountTransaction> getTransactions(String username) {
         userService.getUser(username);
         return constructUser(username).transactions();

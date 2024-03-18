@@ -54,7 +54,7 @@ class TransactionMapperTest {
     void mapFromDtoToAccountTransaction_TransferOut() {
         TransactionDto withdrawalDto = new TransactionDto("user", "someone_else", BigInteger.TEN, TransactionType.TRANSFER);
         AccountTransaction actual = TransactionMapper.mapFromDtoToAccountTransactionWithdrawalOrDeposit(withdrawalDto, "user");
-        AccountTransactionOutgoingTransfer expected = new AccountTransactionOutgoingTransfer(BigInteger.TEN.negate(), TransactionType.TRANSFER, "someone_else");
+        AccountTransactionOutgoingTransfer expected = new AccountTransactionOutgoingTransfer(BigInteger.TEN.negate(), "someone_else");
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -62,7 +62,7 @@ class TransactionMapperTest {
     void mapFromDtoToAccountTransaction_TransferIn() {
         TransactionDto withdrawalDto = new TransactionDto("someone_else", "user", BigInteger.TEN, TransactionType.TRANSFER);
         AccountTransaction actual = TransactionMapper.mapFromDtoToAccountTransactionWithdrawalOrDeposit(withdrawalDto, "user");
-        AccountTransactionIncomingTransfer expected = new AccountTransactionIncomingTransfer(BigInteger.TEN, TransactionType.TRANSFER, "someone_else");
+        AccountTransactionIncomingTransfer expected = new AccountTransactionIncomingTransfer(BigInteger.TEN, "someone_else");
         assertThat(actual).isEqualTo(expected);
     }
 
