@@ -45,6 +45,9 @@ Content-Type: application/json
   "units": 10
 }
 
+### Get balance
+GET http://localhost:8080/accounts/balances/theBanker
+
 ### retreive transaction history
 GET http://localhost:8080/accounts/theBanker/transactions
 
