@@ -4,12 +4,14 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mock.tinybank.dto.AccountAmountDto;
 import org.mock.tinybank.dto.TransactionDto;
+import org.mock.tinybank.dto.UnitTransferDto;
 import org.mock.tinybank.dto.UserDto;
 import org.mock.tinybank.persistence.TransactionPersistenceService;
 
 import java.math.BigInteger;
 import java.util.List;
 
+import static java.math.BigInteger.valueOf;
 import static java.math.BigInteger.*;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,6 +27,7 @@ class AccountServiceTest {
     private AccountService accountService;
     private final String username = "banker_man";
     private final UserDto user = new UserDto(username);
+    private final String otherUser = "otheruser";
 
     @BeforeEach
     void beforeEach() {
@@ -84,12 +87,35 @@ class AccountServiceTest {
         assertThat(actual).isEqualTo(withdrawal);
     }
 
+    @Test
+    void transfer() {
+        TransactionDto transferTransactionDto = new TransactionDto(username, otherUser, TWO, TRANSFER);
+
+        when(transactionPersistenceService.getTransactions(username)).thenReturn(getMockTransactions());
+        when(userService.getUser(username)).thenReturn(user);
+        when(transactionPersistenceService.addTransaction(transferTransactionDto)).thenReturn(transferTransactionDto);
+
+        UnitTransferDto unitTransferDto = new UnitTransferDto(username, otherUser, TWO);
+        UnitTransferDto actual = accountService.transfer(unitTransferDto);
+        assertThat(actual).isEqualTo(unitTransferDto);
+    }
+
+    @Test
+    void transfer_InsufficientBalance() {
+        when(transactionPersistenceService.getTransactions(username)).thenReturn(getMockTransactions());
+        when(userService.getUser(username)).thenReturn(user);
+
+        UnitTransferDto unitTransferDto = new UnitTransferDto(username, otherUser, valueOf(999));
+        assertThatExceptionOfType(InsufficientBalanceException.class)
+                .isThrownBy(() -> accountService.transfer(unitTransferDto));
+    }
+
     private List<TransactionDto> getMockTransactions() {
         return List.of(
                 new TransactionDto("DEPOSIT_POINT", username, TEN, DEPOSIT),
                 new TransactionDto(username, "WITHDRAWAL_POINT", TWO, WITHDRAWAL),
-                new TransactionDto(username, "other_user", TWO, TRANSFER),
-                new TransactionDto("other_user", username, ONE, TRANSFER)
+                new TransactionDto(username, otherUser, TWO, TRANSFER),
+                new TransactionDto(otherUser, username, ONE, TRANSFER)
                 // 10 - 2 - 2 + 1 = 7
         );
     }
