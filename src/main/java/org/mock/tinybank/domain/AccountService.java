@@ -33,8 +33,7 @@ public class AccountService {
     //todo test
     public BigInteger getBalance(String username) {
         UserDto userDto = userService.getUser(username);
-        List<TransactionDto> transactions = transactionPersistenceService.getTransactions(username);
-        User user = new User(transactions.stream().map((transaction) -> TransactionMapper.mapFromDtoToAccountTransactionWithdrawalOrDeposit(transaction, userDto.username())).toList());
+        User user = constructUser(userDto.username());
         return user.getBalance();
     }
 
@@ -51,13 +50,24 @@ public class AccountService {
 
     //todo test
     public UnitTransferDto transfer(UnitTransferDto transactionDto) {
-        userService.getUser(transactionDto.toUser());
+        userService.getUser(transactionDto.toUser()); //this could be a filter
         BigInteger senderBalance = getBalance(transactionDto.fromUser());
         if (isPositive(senderBalance.subtract(transactionDto.units()))) {
             TransactionDto transferTransactionDto = transactionPersistenceService.addTransaction(mapTransferToTransaction(transactionDto));
             return mapTransactionToTransfer(transferTransactionDto);
         }
         throw new InsufficientBalanceException();
+    }
+
+    //todo test
+    public List<AccountTransaction> getTransactions(String username) {
+        userService.getUser(username);
+        return constructUser(username).transactions();
+    }
+
+    private User constructUser(String username) {
+        List<TransactionDto> transactions = transactionPersistenceService.getTransactions(username);
+        return new User(transactions.stream().map((transaction) -> TransactionMapper.mapFromDtoToAccountTransactionWithdrawalOrDeposit(transaction, username)).toList());
     }
 
     private boolean isPositive(BigInteger value) {

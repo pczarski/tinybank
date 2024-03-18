@@ -8,6 +8,7 @@ import java.math.BigInteger;
 
 import static org.mock.tinybank.domain.TransactionType.*;
 
+// could be called a factory
 class TransactionMapper {
     static final String DEPOSIT_POINT = "DEPOSIT_POINT";
     static final String WITHDRAWAL_POINT = "WITHDRAWAL_POINT";
@@ -32,12 +33,17 @@ class TransactionMapper {
         return new AccountAmountDto(userAccount, transactionDto.units());
     }
 
-    static AccountTransaction mapFromDtoToAccountTransactionWithdrawalOrDeposit(TransactionDto transactionDto, String username) {
-        BigInteger netAmount = isNetPositiveTransferTransaction(transactionDto, username) ? transactionDto.units() : transactionDto.units().negate();
-        return new AccountTransaction(netAmount, transactionDto.transactionType());
+    static AccountTransaction mapFromDtoToAccountTransactionWithdrawalOrDeposit(TransactionDto transactionDto, String selectedUsername) {
+        boolean isIncomingTransactionType = isIncomingTransactionType(transactionDto, selectedUsername);
+        BigInteger netAmount = isIncomingTransactionType ? transactionDto.units() : transactionDto.units().negate();
+        if (transactionDto.transactionType() == TRANSFER) {
+            String targetUserName = isIncomingTransactionType ? transactionDto.fromUser() : transactionDto.toUser();
+            return isIncomingTransactionType ? new AccountTransactionIncomingTransfer(netAmount, TRANSFER, targetUserName) : new AccountTransactionOutgoingTransfer(netAmount, TRANSFER, targetUserName);
+        }
+        return new AccountTransactionWithdrawalOrDeposit(netAmount, transactionDto.transactionType());
     }
 
-    private static boolean isNetPositiveTransferTransaction(TransactionDto transactionDto, String username) {
+    private static boolean isIncomingTransactionType(TransactionDto transactionDto, String username) {
         return transactionDto.toUser().equals(username);
     }
 }

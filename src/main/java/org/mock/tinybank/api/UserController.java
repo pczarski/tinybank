@@ -5,7 +5,7 @@ import org.mock.tinybank.dto.UserDto;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
@@ -22,5 +22,10 @@ public class UserController {
     @GetMapping("/{username}")
     public UserDto getUser(@PathVariable String username) {
         return userService.getUser(username);
+    }
+
+    @DeleteMapping("/{username}")
+    public UserDto deactivateUser(@PathVariable String username) {
+        return userService.deactivateUser(username);
     }
 }

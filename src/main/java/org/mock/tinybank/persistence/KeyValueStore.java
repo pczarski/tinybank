@@ -21,4 +21,8 @@ public class KeyValueStore<K,V> {
         }
         return value;
     }
+
+    public V delete(K key) {
+        return hashtable.remove(key);
+    }
 }

@@ -15,4 +15,8 @@ public class UserService {
     public UserDto getUser(String username) throws EntityNotFoundException {
         return users.get(username);
     }
+
+    public UserDto deactivateUser(String username) {
+        return users.delete(username);
+    }
 }

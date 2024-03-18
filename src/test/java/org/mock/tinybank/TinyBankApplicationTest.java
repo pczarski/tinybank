@@ -27,39 +27,38 @@ class TinyBankApplicationTest {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private <T> T post(String path, Object request, Class<T> resposneClass, int expectedCode) throws Exception {
-        String response = mockMvc.perform(MockMvcRequestBuilders.post(path)
-                        .contentType("application/json")
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().is(expectedCode))
-                .andReturn().getResponse().getContentAsString();
-        return objectMapper.readValue(response, resposneClass);
-    }
-    private <T> T get(String path, Class<T> resposneClass, int expectedCode) throws Exception {
-        String response = mockMvc.perform(MockMvcRequestBuilders.get(path))
-                .andExpect(status().is(expectedCode))
-                .andReturn().getResponse().getContentAsString();
-        return objectMapper.readValue(response, resposneClass);
-    }
-
-    private UserDto givenUser(String username) throws Exception {
-        UserDto requestUser = new UserDto(username);
-        return post("/user", requestUser, UserDto.class, HttpStatus.OK.value());
-    }
-
     @Test
     void getNonExistentUser() throws Exception {
-        mockMvc.perform(MockMvcRequestBuilders.get("/user/i_dont_exist"))
+        mockMvc.perform(MockMvcRequestBuilders.get("/users/i_dont_exist"))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     void createUser() throws Exception {
         UserDto requestUser = new UserDto("bankUser");
-        UserDto postResponseUser = post("/user", requestUser, UserDto.class, HttpStatus.OK.value());
+        UserDto postResponseUser = post("/users", requestUser, UserDto.class, HttpStatus.OK.value());
         assertThat(postResponseUser).isEqualTo(requestUser);
-        UserDto getResponseUser = get("/user/" + requestUser.username(), UserDto.class, HttpStatus.OK.value());
+        UserDto getResponseUser = get("/users/" + requestUser.username(), UserDto.class, HttpStatus.OK.value());
         assertThat(getResponseUser).isEqualTo(requestUser);
+    }
+
+    @Test
+    void deactivateUser() throws Exception {
+        givenUser("existing_user");
+        UserDto userToDelete = givenUser("to_delete");
+
+        String response = mockMvc.perform(MockMvcRequestBuilders
+                        .delete("/users/to_delete"))
+                .andExpect(status().is2xxSuccessful())
+                .andReturn().getResponse().getContentAsString();
+
+        UserDto deletedUser = objectMapper.readValue(response, UserDto.class);
+        assertThat(deletedUser)
+                .isEqualTo(userToDelete);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                        .get("/user/" + deletedUser.username()))
+                .andExpect(status().isNotFound());
     }
 
     @Test
@@ -97,7 +96,6 @@ class TinyBankApplicationTest {
 
     @Test
     void transferMoneyToAnotherUser() throws Exception {
-        // Given
         UserDto sender = givenUser("sender");
         UserDto receiver = givenUser("receiver");
         post("/accounts/deposit", new AccountAmountDto(sender.username(), BigInteger.TEN), AccountAmountDto.class, HttpStatus.OK.value());
@@ -110,5 +108,26 @@ class TinyBankApplicationTest {
         BigInteger receiverBalance = get("/accounts/balances/receiver", BigInteger.class, HttpStatus.OK.value());
         assertThat(senderBalance).isEqualTo(6);
         assertThat(receiverBalance).isEqualTo(4);
+    }
+
+    private <T> T post(String path, Object request, Class<T> resposneClass, int expectedCode) throws Exception {
+        String response = mockMvc.perform(MockMvcRequestBuilders.post(path)
+                        .contentType("application/json")
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().is(expectedCode))
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(response, resposneClass);
+    }
+
+    private <T> T get(String path, Class<T> resposneClass, int expectedCode) throws Exception {
+        String response = mockMvc.perform(MockMvcRequestBuilders.get(path))
+                .andExpect(status().is(expectedCode))
+                .andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(response, resposneClass);
+    }
+
+    private UserDto givenUser(String username) throws Exception {
+        UserDto requestUser = new UserDto(username);
+        return post("/users", requestUser, UserDto.class, HttpStatus.OK.value());
     }
 }

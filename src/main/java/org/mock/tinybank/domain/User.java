@@ -1,14 +1,10 @@
 package org.mock.tinybank.domain;
 
+
 import java.math.BigInteger;
 import java.util.List;
 
-public class User {
-    private final List<AccountTransaction> transactions;
-
-    public User(List<AccountTransaction> transactions) {
-        this.transactions = transactions;
-    }
+public record User(List<AccountTransaction> transactions) {
 
     // todo test
     public BigInteger getBalance() {
