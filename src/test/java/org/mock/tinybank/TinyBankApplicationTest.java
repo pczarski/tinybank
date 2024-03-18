@@ -116,16 +116,16 @@ class TinyBankApplicationTest {
         expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.TEN, DEPOSIT));
         expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.valueOf(11), DEPOSIT));
         expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.valueOf(-2), WITHDRAWAL));
-        expectedTransactions.add(new AccountTransactionOutgoingTransfer(BigInteger.valueOf(-4), TRANSFER, "otherUser"));
-        expectedTransactions.add(new AccountTransactionIncomingTransfer(BigInteger.valueOf(3), TRANSFER, "otherUser"));
+        expectedTransactions.add(new OutgoingTransfer(BigInteger.valueOf(-4), TRANSFER, "otherUser"));
+        expectedTransactions.add(new IncomingTransfer(BigInteger.valueOf(3), TRANSFER, "otherUser"));
         return expectedTransactions;
     }
 
     private static List<AccountTransaction> getExpectedTransactionsForOtherUserTransactionHistoryGetTest() {
         List<AccountTransaction> expectedTransactions = new ArrayList<>();
         expectedTransactions.add(new AccountTransactionWithdrawalOrDeposit(BigInteger.TEN, DEPOSIT));
-        expectedTransactions.add(new AccountTransactionIncomingTransfer(BigInteger.valueOf(4), TRANSFER, "firstUser"));
-        expectedTransactions.add(new AccountTransactionOutgoingTransfer(BigInteger.valueOf(-3), TRANSFER, "firstUser"));
+        expectedTransactions.add(new IncomingTransfer(BigInteger.valueOf(4), TRANSFER, "firstUser"));
+        expectedTransactions.add(new OutgoingTransfer(BigInteger.valueOf(-3), TRANSFER, "firstUser"));
         return expectedTransactions;
     }
 

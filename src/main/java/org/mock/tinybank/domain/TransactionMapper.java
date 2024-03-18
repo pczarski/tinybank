@@ -6,7 +6,6 @@ import java.math.BigInteger;
 
 import static org.mock.tinybank.domain.TransactionType.*;
 
-// could be called a factory
 class TransactionMapper {
     static final String DEPOSIT_POINT = "DEPOSIT_POINT";
     static final String WITHDRAWAL_POINT = "WITHDRAWAL_POINT";
@@ -37,9 +36,9 @@ class TransactionMapper {
         BigInteger netAmount = isIncomingTransactionType ? transactionDao.units() : transactionDao.units().negate();
         if (transactionDao.transactionType() == TRANSFER) {
             String targetUserName = isIncomingTransactionType ? transactionDao.fromUser() : transactionDao.toUser();
-            return isIncomingTransactionType ? new AccountTransactionIncomingTransfer(netAmount, TRANSFER, targetUserName) : new AccountTransactionOutgoingTransfer(netAmount, TRANSFER, targetUserName);
+            return isIncomingTransactionType ? new IncomingTransfer(netAmount, TRANSFER, targetUserName) : new OutgoingTransfer(netAmount, TRANSFER, targetUserName);
         }
-        return new AccountTransactionWithdrawalOrDeposit(netAmount, transactionDao.transactionType());
+        return isIncomingTransactionType ? new Deposit(netAmount, DEPOSIT) : new Withdrawal(netAmount, WITHDRAWAL);
     }
 
     private static boolean isIncomingTransactionType(TransactionDao transactionDao, String username) {

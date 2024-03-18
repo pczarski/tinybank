@@ -129,8 +129,8 @@ class AccountServiceTest {
         return List.of(
                 new AccountTransactionWithdrawalOrDeposit(TEN, DEPOSIT),
                 new AccountTransactionWithdrawalOrDeposit(valueOf(-2), WITHDRAWAL),
-                new AccountTransactionOutgoingTransfer(valueOf(-2), TRANSFER, otherUser),
-                new AccountTransactionIncomingTransfer(valueOf(1), TRANSFER, otherUser)
+                new OutgoingTransfer(valueOf(-2), TRANSFER, otherUser),
+                new IncomingTransfer(valueOf(1), TRANSFER, otherUser)
         );
     }
 }

@@ -52,7 +52,7 @@ class TransactionMapperTest {
     void mapFromDtoToAccountTransaction_TransferOut() {
         TransactionDao withdrawalDto = new TransactionDao("user", "someone_else", BigInteger.TEN, TransactionType.TRANSFER);
         AccountTransaction actual = TransactionMapper.toAccountTransactionWithdrawalOrDeposit(withdrawalDto, "user");
-        AccountTransactionOutgoingTransfer expected = new AccountTransactionOutgoingTransfer(BigInteger.TEN.negate(), TransactionType.TRANSFER, "someone_else");
+        OutgoingTransfer expected = new OutgoingTransfer(BigInteger.TEN.negate(), TransactionType.TRANSFER, "someone_else");
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -60,7 +60,7 @@ class TransactionMapperTest {
     void mapFromDtoToAccountTransaction_TransferIn() {
         TransactionDao withdrawalDto = new TransactionDao("someone_else", "user", BigInteger.TEN, TransactionType.TRANSFER);
         AccountTransaction actual = TransactionMapper.toAccountTransactionWithdrawalOrDeposit(withdrawalDto, "user");
-        AccountTransactionIncomingTransfer expected = new AccountTransactionIncomingTransfer(BigInteger.TEN, TransactionType.TRANSFER, "someone_else");
+        IncomingTransfer expected = new IncomingTransfer(BigInteger.TEN, TransactionType.TRANSFER, "someone_else");
         assertThat(actual).isEqualTo(expected);
     }
 
