@@ -170,7 +170,6 @@ class TinyBankApplicationTest {
         assertThat(otherUserTransactionHistoryJson).isEqualTo(expectedOtherUserTransactionsJson);
     }
 
-    //        List<AccountTransaction> transactions = objectMapper.readValue(response, objectMapper.getTypeFactory().constructCollectionType(List.class, AccountTransaction.class));
     private <T> T post(String path, Object request, Class<T> resposneClass, int expectedCode) throws Exception {
         String response = mockMvc.perform(MockMvcRequestBuilders.post(path)
                         .contentType("application/json")
