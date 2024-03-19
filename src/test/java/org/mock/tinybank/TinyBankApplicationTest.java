@@ -2,11 +2,11 @@ package org.mock.tinybank;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
-import org.mock.tinybank.api.dto.TransactionDto;
-import org.mock.tinybank.domain.AccountAmountRequest;
-import org.mock.tinybank.domain.TransactionType;
-import org.mock.tinybank.domain.TransferRequest;
-import org.mock.tinybank.domain.UserRecord;
+import org.mock.tinybank.account.api.dto.TransactionDto;
+import org.mock.tinybank.account.domain.model.AccountAmountRequest;
+import org.mock.tinybank.account.domain.model.TransactionType;
+import org.mock.tinybank.account.domain.model.TransferRequest;
+import org.mock.tinybank.common.UserRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
