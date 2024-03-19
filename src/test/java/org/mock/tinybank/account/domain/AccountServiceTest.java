@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.mock.tinybank.account.domain.model.*;
 import org.mock.tinybank.account.persistence.Dao.TransactionDao;
 import org.mock.tinybank.account.persistence.TransactionPersistenceService;
-import org.mock.tinybank.common.UserRecord;
+import org.mock.tinybank.user.domain.UserRecord;
 import org.mock.tinybank.user.domain.UserService;
 
 import java.math.BigInteger;

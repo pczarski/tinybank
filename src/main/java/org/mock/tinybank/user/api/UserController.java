@@ -1,7 +1,7 @@
 package org.mock.tinybank.user.api;
 
 import lombok.RequiredArgsConstructor;
-import org.mock.tinybank.common.UserRecord;
+import org.mock.tinybank.user.domain.UserRecord;
 import org.mock.tinybank.user.domain.UserService;
 import org.springframework.web.bind.annotation.*;
 

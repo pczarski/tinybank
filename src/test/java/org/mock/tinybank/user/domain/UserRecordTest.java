@@ -1,4 +1,4 @@
-package org.mock.tinybank.common;
+package org.mock.tinybank.user.domain;
 
 import org.junit.jupiter.api.Test;
 
