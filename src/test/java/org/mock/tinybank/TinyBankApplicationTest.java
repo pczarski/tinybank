@@ -97,38 +97,44 @@ class TinyBankApplicationTest {
                 .andExpect(status().isBadRequest());
     }
 
+    private static List<AccountTransaction> getExpectedTransactionsForFirstUserTransactionHistoryGetTest() {
+        return asList(
+                new Deposit(BigInteger.TEN),
+                new Deposit(BigInteger.valueOf(11)),
+                new Withdrawal(BigInteger.valueOf(-2)),
+                new OutgoingTransfer(BigInteger.valueOf(-4), "otherUser"),
+                new IncomingTransfer(BigInteger.valueOf(3), "otherUser")
+        );
+    }
+
+    private static List<AccountTransaction> getExpectedTransactionsForOtherUserTransactionHistoryGetTest() {
+        return asList(
+                new Deposit(BigInteger.TEN),
+                new IncomingTransfer(BigInteger.valueOf(4), "firstUser"),
+                new OutgoingTransfer(BigInteger.valueOf(-3), "firstUser")
+        );
+    }
+
     @Test
     void transferMoneyToAnotherUser() throws Exception {
         UserRecord sender = givenUser("sender");
         UserRecord receiver = givenUser("receiver");
         post("/accounts/deposit", new AccountAmountRequest(sender.username(), BigInteger.TEN), AccountAmountRequest.class, HttpStatus.OK.value());
 
-        UnitTransferRecord transferRequest = new UnitTransferRecord(sender.username(), receiver.username(), BigInteger.valueOf(4));
-        UnitTransferRecord transferResponse = post("/accounts/transfer", transferRequest, UnitTransferRecord.class, HttpStatus.OK.value());
-        assertThat(transferResponse).isEqualTo(transferRequest);
+        TransferRequest transferRequest = new TransferRequest(sender.username(), receiver.username(), BigInteger.valueOf(4));
+        TransactionDto transferResponse = post("/accounts/transfer", transferRequest, TransactionDto.class, HttpStatus.OK.value());
+        TransactionDto expectedResponse = TransactionDto
+                .builder()
+                .receiver(receiver.username())
+                .transactionType(TransactionType.TRANSFER)
+                .netUnits(BigInteger.valueOf(-4))
+                .build();
+        assertThat(transferResponse).isEqualTo(expectedResponse);
 
         BigInteger senderBalance = get("/accounts/balances/sender", BigInteger.class, HttpStatus.OK.value());
         BigInteger receiverBalance = get("/accounts/balances/receiver", BigInteger.class, HttpStatus.OK.value());
         assertThat(senderBalance).isEqualTo(6);
         assertThat(receiverBalance).isEqualTo(4);
-    }
-
-    private static List<AccountTransaction> getExpectedTransactionsForFirstUserTransactionHistoryGetTest() {
-        return asList(
-                new Deposit(BigInteger.TEN, TransactionType.DEPOSIT),
-                new Deposit(BigInteger.valueOf(11), TransactionType.DEPOSIT),
-                new Withdrawal(BigInteger.valueOf(-2), TransactionType.WITHDRAWAL),
-                new OutgoingTransfer(BigInteger.valueOf(-4), TransactionType.TRANSFER, "otherUser"),
-                new IncomingTransfer(BigInteger.valueOf(3), TransactionType.TRANSFER, "otherUser")
-        );
-    }
-
-    private static List<AccountTransaction> getExpectedTransactionsForOtherUserTransactionHistoryGetTest() {
-        return asList(
-                new Deposit(BigInteger.TEN, TransactionType.DEPOSIT),
-                new IncomingTransfer(BigInteger.valueOf(4), TransactionType.TRANSFER, "firstUser"),
-                new OutgoingTransfer(BigInteger.valueOf(-3), TransactionType.TRANSFER, "firstUser")
-        );
     }
 
     @Test
@@ -145,8 +151,8 @@ class TinyBankApplicationTest {
         post("/accounts/deposit", new AccountAmountRequest(firstUser.username(), BigInteger.TEN), AccountAmountRequest.class, HttpStatus.OK.value());
         post("/accounts/deposit", new AccountAmountRequest(firstUser.username(), BigInteger.valueOf(11)), AccountAmountRequest.class, HttpStatus.OK.value());
         post("/accounts/withdraw", new AccountAmountRequest(firstUser.username(), BigInteger.valueOf(2)), AccountAmountRequest.class, HttpStatus.OK.value());
-        post("/accounts/transfer", new UnitTransferRecord(firstUser.username(), otherUser.username(), BigInteger.valueOf(4)), AccountAmountRequest.class, HttpStatus.OK.value());
-        post("/accounts/transfer", new UnitTransferRecord(otherUser.username(), firstUser.username(), BigInteger.valueOf(3)), AccountAmountRequest.class, HttpStatus.OK.value());
+        post("/accounts/transfer", new TransferRequest(firstUser.username(), otherUser.username(), BigInteger.valueOf(4)), AccountAmountRequest.class, HttpStatus.OK.value());
+        post("/accounts/transfer", new TransferRequest(otherUser.username(), firstUser.username(), BigInteger.valueOf(3)), AccountAmountRequest.class, HttpStatus.OK.value());
 
         String firstUserTransactionHistoryJson = mockMvc.perform(MockMvcRequestBuilders.get("/accounts/" + firstUser.username() + "/transactions"))
                 .andExpect(status().is(HttpStatus.OK.value()))

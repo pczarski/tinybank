@@ -4,7 +4,7 @@ import org.mock.tinybank.api.dto.TransactionDto;
 import org.mock.tinybank.domain.AccountAmountRequest;
 import org.mock.tinybank.domain.AccountService;
 import org.mock.tinybank.domain.AccountTransaction;
-import org.mock.tinybank.domain.UnitTransferRecord;
+import org.mock.tinybank.domain.TransferRequest;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
@@ -38,8 +38,8 @@ public class AccountController {
     }
 
     @PostMapping("/transfer")
-    public UnitTransferRecord transfer(@RequestBody UnitTransferRecord transferDto) {
-        return accountService.transfer(transferDto);
+    public TransactionDto transfer(@RequestBody TransferRequest transferRequest) {
+        return toDto(accountService.transfer(transferRequest));
     }
 
     @GetMapping("/{username}/transactions")

@@ -26,7 +26,7 @@ public class AccountService {
 
     public AccountTransaction deposit(AccountAmountRequest deposit) {
         UserRecord user = userService.getUser(deposit.username());
-        TransactionDao transactionDao = transactionPersistenceService.addTransaction(depositToTransaction(deposit));
+        TransactionDao transactionDao = transactionPersistenceService.addTransaction(depositRequestToTransaction(deposit));
         return toAccountTransaction(transactionDao, user.username());
     }
 
@@ -35,19 +35,19 @@ public class AccountService {
         UserRecord user = userService.getUser(withdrawal.username());
         BigInteger balance = getBalance(withdrawal.username());
         if (isPositive(balance.subtract(withdrawal.units()))) {
-            TransactionDao transactionDao = withdrawalToTransaction(withdrawal);
+            TransactionDao transactionDao = withdrawalRequestToTransaction(withdrawal);
             TransactionDao withdrawalTransaction = transactionPersistenceService.addTransaction(transactionDao);
             return toAccountTransaction(withdrawalTransaction, user.username());
         }
         throw new InsufficientBalanceException();
     }
 
-    public UnitTransferRecord transfer(UnitTransferRecord transactionDto) {
-        userService.getUser(transactionDto.toUser());
-        BigInteger senderBalance = getBalance(transactionDto.fromUser());
-        if (isPositive(senderBalance.subtract(transactionDto.units()))) {
-            TransactionDao transferTransactionDao = transactionPersistenceService.addTransaction(toTransaction(transactionDto));
-            return toTransfer(transferTransactionDao);
+    public AccountTransaction transfer(TransferRequest transactionRequest) {
+        UserRecord sender = userService.getUser(transactionRequest.fromUser());
+        BigInteger senderBalance = getBalance(transactionRequest.fromUser());
+        if (isPositive(senderBalance.subtract(transactionRequest.units()))) {
+            TransactionDao transferTransactionDao = transactionPersistenceService.addTransaction(transferRequestToTransaction(transactionRequest));
+            return toAccountTransaction(transferTransactionDao, sender.username());
         }
         throw new InsufficientBalanceException();
     }

@@ -40,7 +40,7 @@ class AccountServiceTest {
 
         AccountAmountRequest deposit = new AccountAmountRequest(username, TWO);
         AccountTransaction actual = accountService.deposit(deposit);
-        AccountTransaction expected = new Deposit(TWO, DEPOSIT);
+        AccountTransaction expected = new Deposit(TWO);
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -80,7 +80,7 @@ class AccountServiceTest {
 
         AccountAmountRequest withdrawal = new AccountAmountRequest(username, TWO);
         AccountTransaction actual = accountService.withdraw(withdrawal);
-        Withdrawal expected = new Withdrawal(valueOf(-2), WITHDRAWAL);
+        Withdrawal expected = new Withdrawal(valueOf(-2));
         assertThat(actual).isEqualTo(expected);
     }
 
@@ -92,9 +92,10 @@ class AccountServiceTest {
         when(userService.getUser(username)).thenReturn(user);
         when(transactionPersistenceService.addTransaction(transferTransactionDao)).thenReturn(transferTransactionDao);
 
-        UnitTransferRecord unitTransferRecord = new UnitTransferRecord(username, otherUser, TWO);
-        UnitTransferRecord actual = accountService.transfer(unitTransferRecord);
-        assertThat(actual).isEqualTo(unitTransferRecord);
+        TransferRequest transferRequest = new TransferRequest(username, otherUser, TWO);
+        AccountTransaction actual = accountService.transfer(transferRequest);
+        AccountTransaction expected = new OutgoingTransfer(valueOf(-2), otherUser);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -102,9 +103,9 @@ class AccountServiceTest {
         when(transactionPersistenceService.getTransactions(username)).thenReturn(getMockTransactions());
         when(userService.getUser(username)).thenReturn(user);
 
-        UnitTransferRecord unitTransferRecord = new UnitTransferRecord(username, otherUser, valueOf(999));
+        TransferRequest transferRequest = new TransferRequest(username, otherUser, valueOf(999));
         assertThatExceptionOfType(InsufficientBalanceException.class)
-                .isThrownBy(() -> accountService.transfer(unitTransferRecord));
+                .isThrownBy(() -> accountService.transfer(transferRequest));
     }
 
     @Test
@@ -127,10 +128,10 @@ class AccountServiceTest {
 
     private List<AccountTransaction> getExpectedMappedTransactions() {
         return List.of(
-                new Deposit(TEN, DEPOSIT),
-                new Withdrawal(valueOf(-2), WITHDRAWAL),
-                new OutgoingTransfer(valueOf(-2), TRANSFER, otherUser),
-                new IncomingTransfer(valueOf(1), TRANSFER, otherUser)
+                new Deposit(TEN),
+                new Withdrawal(valueOf(-2)),
+                new OutgoingTransfer(valueOf(-2), otherUser),
+                new IncomingTransfer(valueOf(1), otherUser)
         );
     }
 }
