@@ -3,7 +3,6 @@ package org.mock.tinybank.api;
 import org.mock.tinybank.api.dto.TransactionDto;
 import org.mock.tinybank.domain.AccountAmountRequest;
 import org.mock.tinybank.domain.AccountService;
-import org.mock.tinybank.domain.AccountTransaction;
 import org.mock.tinybank.domain.TransferRequest;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,8 +42,8 @@ public class AccountController {
     }
 
     @GetMapping("/{username}/transactions")
-    public List<AccountTransaction> getTransactions(@PathVariable String username) {
-        return accountService.getTransactions(username);
+    public List<TransactionDto> getTransactions(@PathVariable String username) {
+        return accountService.getTransactions(username).stream().map(Mapper::toDto).toList();
     }
 
 }

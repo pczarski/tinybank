@@ -3,7 +3,10 @@ package org.mock.tinybank;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.mock.tinybank.api.dto.TransactionDto;
-import org.mock.tinybank.domain.*;
+import org.mock.tinybank.domain.AccountAmountRequest;
+import org.mock.tinybank.domain.TransactionType;
+import org.mock.tinybank.domain.TransferRequest;
+import org.mock.tinybank.domain.UserRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -97,21 +100,21 @@ class TinyBankApplicationTest {
                 .andExpect(status().isBadRequest());
     }
 
-    private static List<AccountTransaction> getExpectedTransactionsForFirstUserTransactionHistoryGetTest() {
+    private static List<TransactionDto> getExpectedTransactionsForFirstUserTransactionHistoryGetTest() {
         return asList(
-                new Deposit(BigInteger.TEN),
-                new Deposit(BigInteger.valueOf(11)),
-                new Withdrawal(BigInteger.valueOf(-2)),
-                new OutgoingTransfer(BigInteger.valueOf(-4), "otherUser"),
-                new IncomingTransfer(BigInteger.valueOf(3), "otherUser")
+                TransactionDto.builder().transactionType(TransactionType.DEPOSIT).netUnits(BigInteger.TEN).build(),
+                TransactionDto.builder().transactionType(TransactionType.DEPOSIT).netUnits(BigInteger.valueOf(11)).build(),
+                TransactionDto.builder().transactionType(TransactionType.WITHDRAWAL).netUnits(BigInteger.valueOf(-2)).build(),
+                TransactionDto.builder().transactionType(TransactionType.TRANSFER).netUnits(BigInteger.valueOf(-4)).receiver("otherUser").build(),
+                TransactionDto.builder().transactionType(TransactionType.TRANSFER).netUnits(BigInteger.valueOf(3)).sender("otherUser").build()
         );
     }
 
-    private static List<AccountTransaction> getExpectedTransactionsForOtherUserTransactionHistoryGetTest() {
+    private static List<TransactionDto> getExpectedTransactionsForOtherUserTransactionHistoryGetTest() {
         return asList(
-                new Deposit(BigInteger.TEN),
-                new IncomingTransfer(BigInteger.valueOf(4), "firstUser"),
-                new OutgoingTransfer(BigInteger.valueOf(-3), "firstUser")
+                TransactionDto.builder().transactionType(TransactionType.DEPOSIT).netUnits(BigInteger.TEN).build(),
+                TransactionDto.builder().transactionType(TransactionType.TRANSFER).netUnits(BigInteger.valueOf(4)).sender("firstUser").build(),
+                TransactionDto.builder().transactionType(TransactionType.TRANSFER).netUnits(BigInteger.valueOf(-3)).receiver("firstUser").build()
         );
     }
 
@@ -162,10 +165,10 @@ class TinyBankApplicationTest {
                 .andExpect(status().is(HttpStatus.OK.value()))
                 .andReturn().getResponse().getContentAsString();
 
-        List<AccountTransaction> expectedFirstUserTransactions = getExpectedTransactionsForFirstUserTransactionHistoryGetTest();
+        List<TransactionDto> expectedFirstUserTransactions = getExpectedTransactionsForFirstUserTransactionHistoryGetTest();
         String expectedFirstUserJson = new ObjectMapper().writeValueAsString(expectedFirstUserTransactions);
 
-        List<AccountTransaction> expectedOtherUserTransactions = getExpectedTransactionsForOtherUserTransactionHistoryGetTest();
+        List<TransactionDto> expectedOtherUserTransactions = getExpectedTransactionsForOtherUserTransactionHistoryGetTest();
         String expectedOtherUserTransactionsJson = new ObjectMapper().writeValueAsString(expectedOtherUserTransactions);
 
         assertThat(firstUserTransactionHistoryJson).isEqualTo(expectedFirstUserJson);
