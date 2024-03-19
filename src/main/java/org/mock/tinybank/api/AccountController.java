@@ -1,6 +1,7 @@
 package org.mock.tinybank.api;
 
-import org.mock.tinybank.domain.AccountAmountRecord;
+import org.mock.tinybank.api.dto.TransactionDto;
+import org.mock.tinybank.domain.AccountAmountRequest;
 import org.mock.tinybank.domain.AccountService;
 import org.mock.tinybank.domain.AccountTransaction;
 import org.mock.tinybank.domain.UnitTransferRecord;
@@ -8,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.math.BigInteger;
 import java.util.List;
+
+import static org.mock.tinybank.api.Mapper.toDto;
 
 @RestController
 @RequestMapping("/accounts")
@@ -20,13 +23,13 @@ public class AccountController {
     }
 
     @PostMapping("/deposit")
-    public AccountAmountRecord deposit(@RequestBody AccountAmountRecord deposit) {
-        return accountService.deposit(deposit);
+    public TransactionDto deposit(@RequestBody AccountAmountRequest depositRequest) {
+        return toDto(accountService.deposit(depositRequest));
     }
 
     @PostMapping("/withdraw")
-    public AccountAmountRecord withdraw(@RequestBody AccountAmountRecord withdrawal) {
-        return accountService.withdraw(withdrawal);
+    public TransactionDto withdraw(@RequestBody AccountAmountRequest withdrawalRequest) {
+        return toDto(accountService.withdraw(withdrawalRequest));
     }
 
     @GetMapping("/balances/{username}")

@@ -38,10 +38,10 @@ class AccountServiceTest {
         when(userService.getUser(username)).thenReturn(user);
         when(transactionPersistenceService.addTransaction(depositTransaction)).thenReturn(depositTransaction);
 
-        AccountAmountRecord deposit = new AccountAmountRecord(username, TWO);
-        AccountAmountRecord actual = accountService.deposit(deposit);
-
-        assertThat(actual).isEqualTo(deposit);
+        AccountAmountRequest deposit = new AccountAmountRequest(username, TWO);
+        AccountTransaction actual = accountService.deposit(deposit);
+        AccountTransaction expected = new Deposit(TWO, DEPOSIT);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -65,7 +65,7 @@ class AccountServiceTest {
         when(userService.getUser(username)).thenReturn(user);
         when(transactionPersistenceService.getTransactions(username)).thenReturn(getMockTransactions());
 
-        AccountAmountRecord withdrawal = new AccountAmountRecord(username, BigInteger.valueOf(9999));
+        AccountAmountRequest withdrawal = new AccountAmountRequest(username, BigInteger.valueOf(9999));
         assertThatExceptionOfType(InsufficientBalanceException.class)
                 .isThrownBy(() -> accountService.withdraw(withdrawal));
     }
@@ -78,10 +78,10 @@ class AccountServiceTest {
         when(userService.getUser(username)).thenReturn(user);
         when(transactionPersistenceService.addTransaction(withdrawTransaction)).thenReturn(withdrawTransaction);
 
-        AccountAmountRecord withdrawal = new AccountAmountRecord(username, TWO);
-        AccountAmountRecord actual = accountService.withdraw(withdrawal);
-
-        assertThat(actual).isEqualTo(withdrawal);
+        AccountAmountRequest withdrawal = new AccountAmountRequest(username, TWO);
+        AccountTransaction actual = accountService.withdraw(withdrawal);
+        Withdrawal expected = new Withdrawal(valueOf(-2), WITHDRAWAL);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test

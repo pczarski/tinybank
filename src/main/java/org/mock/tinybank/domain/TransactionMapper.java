@@ -10,11 +10,11 @@ class TransactionMapper {
     static final String DEPOSIT_POINT = "DEPOSIT_POINT";
     static final String WITHDRAWAL_POINT = "WITHDRAWAL_POINT";
 
-    static TransactionDao depositToTransaction(AccountAmountRecord deposit) {
+    static TransactionDao depositToTransaction(AccountAmountRequest deposit) {
         return new TransactionDao(DEPOSIT_POINT, deposit.username(), deposit.units(), DEPOSIT);
     }
 
-    static TransactionDao withdrawalToTransaction(AccountAmountRecord withdrawal) {
+    static TransactionDao withdrawalToTransaction(AccountAmountRequest withdrawal) {
         return new TransactionDao(withdrawal.username(), WITHDRAWAL_POINT, withdrawal.units(), WITHDRAWAL);
     }
 
@@ -26,12 +26,12 @@ class TransactionMapper {
         return new UnitTransferRecord(transactionDao.fromUser(), transactionDao.toUser(), transactionDao.units());
     }
 
-    static AccountAmountRecord toDepositWithdrawalDto(TransactionDao transactionDao) {
+    static AccountAmountRequest toAccountAmountRecord(TransactionDao transactionDao) {
         String userAccount = transactionDao.transactionType() == DEPOSIT ? transactionDao.toUser() : transactionDao.fromUser();
-        return new AccountAmountRecord(userAccount, transactionDao.units());
+        return new AccountAmountRequest(userAccount, transactionDao.units());
     }
 
-    static AccountTransaction toAccountTransactionWithdrawalOrDeposit(TransactionDao transactionDao, String selectedUsername) {
+    static AccountTransaction toAccountTransaction(TransactionDao transactionDao, String selectedUsername) {
         boolean isIncomingTransactionType = isIncomingTransactionType(transactionDao, selectedUsername);
         BigInteger netAmount = isIncomingTransactionType ? transactionDao.units() : transactionDao.units().negate();
         if (transactionDao.transactionType() == TRANSFER) {

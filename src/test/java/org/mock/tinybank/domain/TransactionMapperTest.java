@@ -10,7 +10,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class TransactionMapperTest {
     @Test
     void mapDepositToTransaction() {
-        AccountAmountRecord deposit = new AccountAmountRecord("user", BigInteger.TEN);
+        AccountAmountRequest deposit = new AccountAmountRequest("user", BigInteger.TEN);
         TransactionDao actual = TransactionMapper.depositToTransaction(deposit);
         TransactionDao expected = new TransactionDao(TransactionMapper.DEPOSIT_POINT, "user", BigInteger.TEN, TransactionType.DEPOSIT);
         assertThat(actual).isEqualTo(expected);
@@ -19,14 +19,14 @@ class TransactionMapperTest {
     @Test
     void mapTransactionToDeposit() {
         TransactionDao transactionDao = new TransactionDao(TransactionMapper.DEPOSIT_POINT, "user", BigInteger.ONE, TransactionType.DEPOSIT);
-        AccountAmountRecord actual = TransactionMapper.toDepositWithdrawalDto(transactionDao);
-        AccountAmountRecord expected = new AccountAmountRecord("user", BigInteger.ONE);
+        AccountAmountRequest actual = TransactionMapper.toAccountAmountRecord(transactionDao);
+        AccountAmountRequest expected = new AccountAmountRequest("user", BigInteger.ONE);
         assertThat(actual).isEqualTo(expected);
     }
 
     @Test
     void mapWithdrawalToTransaction() {
-        AccountAmountRecord withdrawal = new AccountAmountRecord("user", BigInteger.TEN);
+        AccountAmountRequest withdrawal = new AccountAmountRequest("user", BigInteger.TEN);
         TransactionDao actual = TransactionMapper.withdrawalToTransaction(withdrawal);
         TransactionDao expected = new TransactionDao("user", TransactionMapper.WITHDRAWAL_POINT, BigInteger.TEN, TransactionType.WITHDRAWAL);
         assertThat(actual).isEqualTo(expected);
@@ -35,7 +35,7 @@ class TransactionMapperTest {
     @Test
     void mapFromDtoToAccountTransaction_Deposit() {
         TransactionDao depositDto = new TransactionDao("source", "user", BigInteger.TEN, TransactionType.DEPOSIT);
-        AccountTransaction actual = TransactionMapper.toAccountTransactionWithdrawalOrDeposit(depositDto, "user");
+        AccountTransaction actual = TransactionMapper.toAccountTransaction(depositDto, "user");
         Deposit expected = new Deposit(BigInteger.TEN, TransactionType.DEPOSIT);
         assertThat(actual).isEqualTo(expected);
     }
@@ -43,7 +43,7 @@ class TransactionMapperTest {
     @Test
     void mapFromDtoToAccountTransaction_Withdrawal() {
         TransactionDao withdrawalDto = new TransactionDao("user", "withdrawal_point", BigInteger.TEN, TransactionType.WITHDRAWAL);
-        AccountTransaction actual = TransactionMapper.toAccountTransactionWithdrawalOrDeposit(withdrawalDto, "user");
+        AccountTransaction actual = TransactionMapper.toAccountTransaction(withdrawalDto, "user");
         Withdrawal expected = new Withdrawal(BigInteger.TEN.negate(), TransactionType.WITHDRAWAL);
         assertThat(actual).isEqualTo(expected);
     }
@@ -51,7 +51,7 @@ class TransactionMapperTest {
     @Test
     void mapFromDtoToAccountTransaction_TransferOut() {
         TransactionDao withdrawalDto = new TransactionDao("user", "someone_else", BigInteger.TEN, TransactionType.TRANSFER);
-        AccountTransaction actual = TransactionMapper.toAccountTransactionWithdrawalOrDeposit(withdrawalDto, "user");
+        AccountTransaction actual = TransactionMapper.toAccountTransaction(withdrawalDto, "user");
         OutgoingTransfer expected = new OutgoingTransfer(BigInteger.TEN.negate(), TransactionType.TRANSFER, "someone_else");
         assertThat(actual).isEqualTo(expected);
     }
@@ -59,7 +59,7 @@ class TransactionMapperTest {
     @Test
     void mapFromDtoToAccountTransaction_TransferIn() {
         TransactionDao withdrawalDto = new TransactionDao("someone_else", "user", BigInteger.TEN, TransactionType.TRANSFER);
-        AccountTransaction actual = TransactionMapper.toAccountTransactionWithdrawalOrDeposit(withdrawalDto, "user");
+        AccountTransaction actual = TransactionMapper.toAccountTransaction(withdrawalDto, "user");
         IncomingTransfer expected = new IncomingTransfer(BigInteger.TEN, TransactionType.TRANSFER, "someone_else");
         assertThat(actual).isEqualTo(expected);
     }
