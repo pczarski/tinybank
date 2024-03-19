@@ -23,6 +23,6 @@ class Mapper {
         if (accountTransaction instanceof OutgoingTransfer) {
             return builder.receiver(((OutgoingTransfer) accountTransaction).receiver()).build();
         }
-        throw new RuntimeException();
+        throw new UnsupportedAccountTransactionException();
     }
 }
